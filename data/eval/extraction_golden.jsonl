@@ -1,0 +1,64 @@
+{"tag": "duration_few_seconds", "patient_text": "It's just a few seconds each time, then it's completely gone.", "known_slots": {}, "gold_slots": {"duration": "few_seconds"}}
+{"tag": "duration_few_seconds", "patient_text": "Quick little jabs, maybe a second or two, and then nothing.", "known_slots": {}, "gold_slots": {"duration": "few_seconds"}}
+{"tag": "duration_under_5", "patient_text": "It lasts maybe 3 or 4 minutes each time.", "known_slots": {}, "gold_slots": {"duration": "under_5_min"}}
+{"tag": "duration_under_5", "patient_text": "Less than five minutes, usually.", "known_slots": {}, "gold_slots": {"duration": "under_5_min"}}
+{"tag": "duration_over_5", "patient_text": "It's been going on for like 20 minutes now and hasn't stopped.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "chest_pain_present_now": true}}
+{"tag": "duration_over_5", "patient_text": "More than five minutes for sure, maybe closer to ten.", "known_slots": {}, "gold_slots": {"duration": "over_5_min"}}
+{"tag": "duration_few_seconds_pattern", "patient_text": "It comes and goes, each spell only lasts a second or two.", "known_slots": {}, "gold_slots": {"duration": "few_seconds", "pattern_comes_and_goes": true}}
+{"tag": "duration_over_5_constant", "patient_text": "It's constant, hasn't let up in over half an hour.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "pattern_comes_and_goes": false}}
+{"tag": "radiation", "patient_text": "It shoots up into my jaw when it happens.", "known_slots": {}, "gold_slots": {"radiation_sites": ["jaw"]}}
+{"tag": "radiation", "patient_text": "Kind of moves down my left arm.", "known_slots": {}, "gold_slots": {"radiation_sites": ["arm"]}}
+{"tag": "radiation", "patient_text": "Radiates straight through to my back.", "known_slots": {}, "gold_slots": {"radiation_sites": ["back"]}}
+{"tag": "radiation_negative", "patient_text": "It stays right in the middle of my chest, doesn't go anywhere else.", "known_slots": {}, "gold_slots": {"radiation_sites": []}}
+{"tag": "radiation_multi", "patient_text": "Goes into my neck and both shoulders.", "known_slots": {}, "gold_slots": {"radiation_sites": ["neck", "shoulder"]}}
+{"tag": "onset_minutes", "patient_text": "This started about 20 minutes ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 0.33}}
+{"tag": "onset_days", "patient_text": "It's been like this for 2 days now.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 48}}
+{"tag": "onset_minutes", "patient_text": "Just started, maybe 5 minutes ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 0.083}}
+{"tag": "onset_days", "patient_text": "Started about 4 days ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 96}}
+{"tag": "onset_hours", "patient_text": "Began a few hours ago, maybe 3.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 3}}
+{"tag": "gerd_trap", "patient_text": "It's probably just my heartburn, I get this all the time.", "known_slots": {}, "gold_slots": {"suspected_cause": "heartburn"}}
+{"tag": "gerd_two_of_three", "patient_text": "This feels exactly like the heartburn my doctor diagnosed before, and there's a burning right in my chest.", "known_slots": {}, "gold_slots": {"heartburn_exact_match": true, "burning_in_chest": true}}
+{"tag": "gerd_all_three", "patient_text": "Yeah it's exactly like my usual heartburn, burning, and I've got a sour taste in my mouth too.", "known_slots": {}, "gold_slots": {"heartburn_exact_match": true, "burning_in_chest": true, "sour_taste_in_mouth": true}}
+{"tag": "gerd_trap_no_prior_diagnosis", "patient_text": "I think it's acid reflux but I've never actually been diagnosed with anything.", "known_slots": {}, "gold_slots": {"suspected_cause": "acid reflux"}}
+{"tag": "gerd_partial_denial", "patient_text": "There's burning in my chest but no weird taste or anything in my mouth.", "known_slots": {}, "gold_slots": {"burning_in_chest": true, "sour_taste_in_mouth": false}}
+{"tag": "severity_ceiling", "patient_text": "Worst pain of my life, maybe an 11 if that were possible.", "known_slots": {}, "gold_slots": {"severity_1_10": 10}}
+{"tag": "severity_low", "patient_text": "Eh, like a 3, kind of annoying but not terrible.", "known_slots": {}, "gold_slots": {"severity_1_10": 3}}
+{"tag": "pain_quality", "patient_text": "It's crushing, like someone's standing on my chest.", "known_slots": {}, "gold_slots": {"pain_qualities": ["crushing"]}}
+{"tag": "pain_quality_multi", "patient_text": "Sharp, stabbing pain.", "known_slots": {}, "gold_slots": {"pain_qualities": ["sharp", "stabbing"]}}
+{"tag": "pain_quality", "patient_text": "Just a dull ache, really.", "known_slots": {}, "gold_slots": {"pain_qualities": ["aching"]}}
+{"tag": "risk_factors", "patient_text": "I'm diabetic and I smoke.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["diabetes", "smoker"]}}
+{"tag": "history_negative", "patient_text": "No heart problems that I know of.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false}}
+{"tag": "history_positive", "patient_text": "I had a stent put in two years ago.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
+{"tag": "angina_negative", "patient_text": "I've never been told I have angina.", "known_slots": {}, "gold_slots": {"known_angina_history": false}}
+{"tag": "risk_factors", "patient_text": "My dad had a heart attack at 50.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["strong_family_history"]}}
+{"tag": "risk_factors", "patient_text": "I have high blood pressure and I'm overweight.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["hypertension", "obesity_bmi_30_plus"]}}
+{"tag": "negative_control", "patient_text": "No, nothing like that, just the chest pain.", "known_slots": {}, "gold_slots": {"other_symptoms": []}}
+{"tag": "negative_control", "patient_text": "Nope, none of those, no surgeries or anything.", "known_slots": {}, "gold_slots": {"pe_risk_factors": []}}
+{"tag": "negative_control", "patient_text": "I haven't traveled anywhere or had surgery recently.", "known_slots": {}, "gold_slots": {"pe_risk_factors": []}}
+{"tag": "multi_fact_dense", "patient_text": "It's a crushing pain right in the middle of my chest, been going on for about 15 minutes, radiates into my left arm and jaw, and I feel really sweaty and nauseous.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "pain_qualities": ["crushing"], "radiation_sites": ["arm", "jaw"], "other_symptoms": ["sweating", "nausea"]}}
+{"tag": "multi_fact_dense", "patient_text": "I'm 58, it started 20 minutes ago, hurts about a 7 out of 10, and I have diabetes and high blood pressure.", "known_slots": {}, "gold_slots": {"age": 58, "onset_hours_ago": 0.33, "severity_1_10": 7, "cardiac_risk_factors": ["diabetes", "hypertension"]}}
+{"tag": "multi_fact", "patient_text": "I'm having trouble breathing and my chest feels tight.", "known_slots": {}, "gold_slots": {"other_symptoms": ["difficulty_breathing"], "pain_qualities": ["tightness"]}}
+{"tag": "nitro_resolved", "patient_text": "Took my nitro pill about ten minutes ago and the pain's completely gone now.", "known_slots": {}, "gold_slots": {"nitroglycerin_status": "taken_resolved"}}
+{"tag": "nitro_not_taken", "patient_text": "I've got nitro prescribed but I haven't taken any yet for this.", "known_slots": {}, "gold_slots": {"nitroglycerin_status": "prescribed_not_taken"}}
+{"tag": "hedged_no_guess", "patient_text": "I dunno, it just kind of hurts, hard to describe.", "known_slots": {}, "gold_slots": {}}
+{"tag": "hedged_weak_signal", "patient_text": "Maybe... I don't know, sometimes it's there, sometimes it's not?", "known_slots": {}, "gold_slots": {"pattern_comes_and_goes": true}}
+{"tag": "hedged_no_guess", "patient_text": "Um, I guess it's been a while? Not really sure exactly when it started.", "known_slots": {}, "gold_slots": {}}
+{"tag": "injury_redirect", "patient_text": "This started right after I got hit in the chest playing football.", "known_slots": {}, "gold_slots": {"followed_chest_injury": true}}
+{"tag": "injury_negative", "patient_text": "No injury, it just came out of nowhere.", "known_slots": {}, "gold_slots": {"followed_chest_injury": false}}
+{"tag": "pregnancy", "patient_text": "There's a chance I could be pregnant, my period's late.", "known_slots": {}, "gold_slots": {"pregnant": true}}
+{"tag": "pregnancy_negative", "patient_text": "No way I'm pregnant.", "known_slots": {}, "gold_slots": {"pregnant": false}}
+{"tag": "pleuritic", "patient_text": "It hurts worse when I take a deep breath.", "known_slots": {}, "gold_slots": {"pain_worse_with_deep_breath": true}}
+{"tag": "movement_negative", "patient_text": "Moving around or twisting doesn't change it at all.", "known_slots": {}, "gold_slots": {"pain_worse_with_movement": false}}
+{"tag": "cough_related", "patient_text": "It happens when I cough.", "known_slots": {}, "gold_slots": {"pain_caused_by_coughing": true}}
+{"tag": "rash", "patient_text": "There's a rash right where it hurts, looks like little blisters.", "known_slots": {}, "gold_slots": {"rash_at_pain_site": true}}
+{"tag": "fever", "patient_text": "My temp is like 101.5.", "known_slots": {}, "gold_slots": {"temperature_f": 101.5}}
+{"tag": "correction", "patient_text": "Actually wait, I think it's been longer than that, more like 10 minutes.", "known_slots": {"duration": "under_5_min"}, "gold_slots": {"duration": "over_5_min"}}
+{"tag": "context_no_restate", "patient_text": "And no, I don't have any heart disease history.", "known_slots": {"age": 40}, "gold_slots": {"history_of_heart_disease": false}}
+{"tag": "cardiac_symptoms_now", "patient_text": "Right now I'm also feeling a bit dizzy and sweaty.", "known_slots": {}, "gold_slots": {"cardiac_symptoms_present_now": true}}
+{"tag": "cocaine_use", "patient_text": "I did use cocaine a couple days ago.", "known_slots": {}, "gold_slots": {"cocaine_use_within_3_days": true}}
+{"tag": "heart_rate", "patient_text": "I checked my pulse, it's around 130.", "known_slots": {}, "gold_slots": {"heart_rate_bpm": 130}}
+{"tag": "lmp", "patient_text": "My last period was about three weeks ago.", "known_slots": {}, "gold_slots": {"lmp": "about three weeks ago"}}
+{"tag": "location", "patient_text": "It hurts right in the center of my chest.", "known_slots": {}, "gold_slots": {"location": "center of chest"}}
+{"tag": "passed_out", "patient_text": "I fainted for a few seconds earlier.", "known_slots": {}, "gold_slots": {"passed_out": true}}
+{"tag": "pattern_worsening", "patient_text": "It's been getting worse and happening more often.", "known_slots": {}, "gold_slots": {"pattern_worsening": true}}
+{"tag": "worse_with_exertion", "patient_text": "It gets worse when I climb stairs or walk fast.", "known_slots": {}, "gold_slots": {"worse_with_exertion": true}}
