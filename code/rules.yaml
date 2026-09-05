@@ -1,0 +1,453 @@
+# =============================================================================
+# rules.yaml  --  Deterministic triage decision table
+#
+# Source protocol:
+#   "Chest Pain -- After Hours Telehealth Triage Guidelines | Adult | 2026"
+#   Schmitt-Thompson Clinical Content (David A. Thompson MD).
+#
+# HOW THE ENGINE READS THIS FILE
+#   * `dispositions` is an ORDERED list, most urgent first. The engine walks it
+#     top to bottom and returns the FIRST rule whose `when` clause evaluates
+#     definitively TRUE. Within a disposition, rules are OR'd.
+#   * Every atom is [slot_name, op, value]. Groups: {all:[...]}, {any:[...]},
+#     {none:[...]}. `none` is how protocol "Exception:" clauses are encoded
+#     (the rule fires only if none of the exception conditions hold).
+#   * THREE-VALUED LOGIC. If a slot referenced by an atom is missing, the atom
+#     is UNKNOWN, and a rule that depends on it cannot fire yet. This is what
+#     lets the state machine (a) short-circuit the moment a red flag is
+#     definitively true and (b) know which slot to ask for next.
+#   * The LLM never sees this file's logic and never picks a disposition.
+#     It only fills slots. All routing happens here.
+#
+# DOCUMENTED ASSUMPTIONS (see README for rationale)
+#   A1  The four "chest pain lasts > 5 min" EMS rules also require
+#       chest_pain_present_now == true. Without this, every lower tier that
+#       begins "occurred in past 3 days" / "resolved > 3 days ago" is
+#       unreachable. A resolved >5-min episode routes to ED/UCC (recent) or
+#       See-PCP-24h (old), per the protocol's own lower tiers.
+#   A2  Pregnancy: the "Go to L&D Now" branching logic is not in this protocol
+#       excerpt. Pregnancy does NOT change the computed disposition in v1; the
+#       engine attaches pregnant=true to its output and the NLG layer adds a
+#       "an ED with L&D capability is appropriate" note for any ED+ tier.
+#   A3  `duration` is a 3-way exclusive enum: few_seconds | under_5_min |
+#       over_5_min. "Chest pains that last only a few seconds" exceptions are
+#       therefore satisfied simply by duration == few_seconds.
+#   A4  `triager_assessment_*` slots (the two subjective protocol rules) are
+#       set ONLY by the standalone LLM distress classifier, never by slot
+#       extraction, and every firing is logged for the eval report.
+#   A5  `cardiac_risk_factors` counts the modifiable/history risk factors only
+#       (diabetes, hypertension, high cholesterol, obesity BMI>=30, smoker,
+#       PVD, strong family history). Age is scored separately by the age>44 /
+#       age>30 rules. Known CAD (prior MI, stent, CABG, angina, takes nitro)
+#       is captured by history_of_heart_disease.
+# =============================================================================
+
+meta:
+  protocol: "Chest Pain - After Hours Telehealth Triage Guidelines | Adult | 2026"
+  scope: "Adults (>= 18) reporting non-traumatic chest pain. English only."
+  disposition_order:
+    - CALL_EMS_911_NOW
+    - SEE_MORE_APPROPRIATE_GUIDELINE
+    - GO_TO_ED_NOW
+    - GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    - SEE_PCP_WITHIN_24_HOURS
+    - CALL_PCP_WITHIN_24_HOURS
+    - SEE_PCP_WITHIN_3_DAYS
+    - HOME_CARE
+  definition: >
+    Uncomfortable pressure, fullness, squeezing, tightness, or other pain from
+    the clavicles to the bottom of the rib cage, constant or intermittent, not
+    from a traumatic injury.
+  severity_scale:
+    mild: "1-3: does not interfere with normal activities"
+    moderate: "4-7: interferes with normal activities or awakens from sleep"
+    severe: "8-10: excruciating, unable to do any normal activities"
+  clinical_cautions:
+    - "Never assume chest discomfort is acid reflux. Cardiac ischemia can feel
+       exactly like indigestion. GERD is only concluded via the single
+       cpcp24_gerd rule, and only when all three of its conditions are explicit."
+    - "There is no symptom combination that reliably rules out serious causes.
+       When in doubt the protocol routes up, not down."
+
+# =============================================================================
+# DISPOSITIONS  (ordered, first definitive match wins)
+# =============================================================================
+dispositions:
+
+  # ---------------------------------------------------------------------------
+  - name: CALL_EMS_911_NOW
+    rules:
+      - id: ems_severe_dyspnea
+        protocol: "SEVERE difficulty breathing (struggling for each breath,
+                   speaks in single words)"
+        when: {all: [[severe_difficulty_breathing, "==", true]]}
+        rule_out: [respiratory_failure, hypoxia]
+        care_advice: [40, 1]
+
+      - id: ems_altered_mental_status
+        protocol: "Difficult to awaken or acting confused (disoriented,
+                   slurred speech)"
+        when: {all: [[confused_or_hard_to_awaken, "==", true]]}
+        rule_out: [shock]
+        first_aid: [1045]          # lie down, feet elevated
+        care_advice: [40, 1045, 1]
+
+      - id: ems_shock
+        protocol: "Shock suspected (cold/pale/clammy skin, too weak to stand,
+                   low BP, rapid pulse)"
+        when: {all: [[shock_signs, "==", true]]}
+        rule_out: [shock]
+        first_aid: [1045]
+        care_advice: [40, 1045, 1]
+
+      - id: ems_syncope
+        protocol: "Passed out (fainted, lost consciousness, blacked out and
+                   not responding)"
+        when: {all: [[passed_out, "==", true]]}
+        rule_out: [arrhythmia, shock]
+        first_aid: [1045]
+        care_advice: [40, 1045, 1]
+
+      - id: ems_prolonged_pain_age
+        protocol: "[1] Chest pain lasts > 5 min AND [2] age > 44"
+        note: "A1: also requires chest_pain_present_now == true"
+        when:
+          all:
+            - [chest_pain_present_now, "==", true]
+            - [duration, "==", over_5_min]
+            - [age, ">", 44]
+        rule_out: [acute_coronary_syndrome, myocardial_infarction]
+        first_aid: [1610]          # chew aspirin after calling 911
+        care_advice: [40, 1610, 1]
+
+      - id: ems_prolonged_pain_risk_factors
+        protocol: "[1] Chest pain lasts > 5 min AND [2] age > 30 AND
+                   [3] one or more cardiac risk factors"
+        note: "A1 + A5"
+        when:
+          all:
+            - [chest_pain_present_now, "==", true]
+            - [duration, "==", over_5_min]
+            - [age, ">", 30]
+            - [cardiac_risk_factors, nonempty, true]
+        rule_out: [acute_coronary_syndrome, myocardial_infarction]
+        first_aid: [1610]
+        care_advice: [40, 1610, 1]
+
+      - id: ems_prolonged_pain_known_heart_disease
+        protocol: "[1] Chest pain lasts > 5 min AND [2] history of heart disease
+                   (angina, heart attack, heart failure, bypass surgery, takes
+                   nitroglycerin)"
+        note: "A1"
+        when:
+          all:
+            - [chest_pain_present_now, "==", true]
+            - [duration, "==", over_5_min]
+            - [history_of_heart_disease, "==", true]
+        rule_out: [acute_coronary_syndrome, myocardial_infarction]
+        first_aid: [1610]
+        care_advice: [40, 1610, 1]
+
+      - id: ems_prolonged_pain_crushing_quality
+        protocol: "[1] Chest pain lasts > 5 min AND [2] described as crushing,
+                   pressure-like, or heavy"
+        note: "A1"
+        when:
+          all:
+            - [chest_pain_present_now, "==", true]
+            - [duration, "==", over_5_min]
+            - [pain_qualities, contains_any, [crushing, pressure, heavy]]
+        rule_out: [acute_coronary_syndrome, aortic_dissection, myocardial_infarction]
+        first_aid: [1610]
+        care_advice: [40, 1610, 1]
+
+      - id: ems_abnormal_heart_rate
+        protocol: "Heart rate < 50 bpm OR > 140 bpm"
+        when:
+          any:
+            - [heart_rate_bpm, "<", 50]
+            - [heart_rate_bpm, ">", 140]
+        rule_out: [arrhythmia]
+        care_advice: [40, 1]
+
+      - id: ems_visible_diaphoresis
+        protocol: "Visible sweat on face or sweat dripping down face
+                   (true diaphoresis)"
+        note: "Distinct from patient merely reporting 'sweating' as a symptom
+               (that is other_symptoms contains sweating). This slot is set
+               only from an explicit observation."
+        when: {all: [[visible_facial_diaphoresis, "==", true]]}
+        care_advice: [40, 1]
+
+      - id: ems_triager_life_threatening
+        protocol: "Sounds like a life-threatening emergency to the triager"
+        triager_judgment: true
+        when: {all: [[triager_assessment_life_threatening, "==", true]]}
+        care_advice: [40, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: SEE_MORE_APPROPRIATE_GUIDELINE
+    rules:
+      - id: injury_redirect
+        protocol: "Followed a chest injury -> Go to Guideline: Chest Injury (Adult)"
+        when: {all: [[followed_chest_injury, "==", true]]}
+        route_to: "Chest Injury (Adult) guideline -- OUT OF SCOPE for this agent"
+        note: "Agent must stop triaging and tell the patient this tool only
+               covers non-injury chest pain."
+
+  # ---------------------------------------------------------------------------
+  - name: GO_TO_ED_NOW
+    rules:
+      - id: ed_severe_pain
+        protocol: "SEVERE chest pain (8-10 / excruciating)"
+        when: {all: [[severity_1_10, ">=", 8]]}
+        care_advice: [41, 92, 81, 84, 17, 1]
+
+      - id: ed_worsening_angina
+        protocol: "[1] Chest pain (or 'angina') comes and goes AND [2] is
+                   happening more often or getting worse.
+                   Exception: chest pains that last only a few seconds."
+        when:
+          all:
+            - [pattern_comes_and_goes, "==", true]
+            - [pattern_worsening, "==", true]
+          none:
+            - [duration, "==", few_seconds]
+        rule_out: [acute_coronary_syndrome, unstable_angina]
+        care_advice: [41, 80, 81, 84, 17, 1]
+
+      - id: ed_radiation_to_shoulder_arm_jaw
+        protocol: "Pain also in shoulder(s) or arm(s) or jaw.
+                   Exception: pain is clearly made worse by movement."
+        when:
+          all:
+            - [radiation_sites, contains_any, [shoulder, arm, jaw]]
+          none:
+            - [pain_worse_with_movement, "==", true]
+        rule_out: [acute_coronary_syndrome]
+        care_advice: [41, 92, 81, 17, 1]
+
+      - id: ed_difficulty_breathing
+        protocol: "Difficulty breathing (non-severe; severe form is caught by
+                   ems_severe_dyspnea above)"
+        when: {all: [[other_symptoms, contains, difficulty_breathing]]}
+        care_advice: [41, 92, 81, 84, 17, 1]
+
+      - id: ed_hemoptysis
+        protocol: "Coughing up blood"
+        when: {all: [[other_symptoms, contains, hemoptysis]]}
+        rule_out: [pulmonary_embolism]
+        care_advice: [41, 80, 81, 84, 17, 1]
+
+      - id: ed_cocaine_use
+        protocol: "Cocaine use within last 3 days (can precipitate ACS)"
+        when: {all: [[cocaine_use_within_3_days, "==", true]]}
+        care_advice: [41, 80, 81, 84, 17, 1]
+
+      # The protocol lists 7 separate PE-risk lines with the same disposition
+      # and R/O, but THREE different care-advice lists (caught by an
+      # independent conformance checker against the source PDF -- the earlier
+      # single merged rule always emitted [41,80,81,84,17,1], which is wrong
+      # for surgery/inherited-clotting (extra "call EMS if") and badly wrong
+      # for cancer (adds "another adult should drive" / "nothing by mouth" /
+      # "call EMS if" that line doesn't call for). Split by CA group instead
+      # of a single membership test so each group's care_advice is exact.
+      - id: ed_pe_risk_surgery_or_clotting_disorder
+        protocol: "Major surgery in past month; OR history of inherited
+                   increased risk of blood clots"
+        when:
+          all:
+            - [pe_risk_factors, contains_any,
+               [recent_major_surgery_1mo, inherited_clotting_disorder]]
+        rule_out: [pulmonary_embolism]
+        care_advice: [41, 80, 81, 17, 1]
+
+      - id: ed_pe_risk_immobility_or_clot_history
+        protocol: "Hip or leg fracture/cast in past month; OR illness requiring
+                   prolonged bedrest in past month; OR long-distance travel
+                   (>= 6 h) in past month; OR history of prior blood clot
+                   (DVT/PE)"
+        when:
+          all:
+            - [pe_risk_factors, contains_any,
+               [leg_or_hip_fracture_or_cast_1mo, prolonged_bedrest_1mo,
+                long_travel_6h_1mo, prior_dvt_or_pe]]
+        rule_out: [pulmonary_embolism]
+        care_advice: [41, 80, 81, 84, 17, 1]
+
+      - id: ed_pe_risk_cancer
+        protocol: "Cancer treatment in past six months (or has cancer now)"
+        when: {all: [[pe_risk_factors, contains, cancer_active_or_treated_6mo]]}
+        rule_out: [pulmonary_embolism]
+        care_advice: [41, 81, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    rules:
+      - id: educ_pleuritic_pain
+        protocol: "Taking a deep breath makes pain worse"
+        when: {all: [[pain_worse_with_deep_breath, "==", true]]}
+        rule_out: [pleurisy, pneumothorax, pulmonary_embolism]
+        care_advice: [42, 87, 17, 1]
+
+      - id: educ_recent_prolonged_pain
+        protocol: "[1] Chest pain lasts > 5 min AND [2] occurred in past 3 days
+                   (72 h).
+                   Exception: feels exactly the same as previously diagnosed
+                   heartburn AND has accompanying sour taste in mouth."
+        note: "Reachable only when the EMS prolonged-pain rules did not fire
+               (e.g. pain has since resolved, or patient is <= 44 with no risk
+               factors / heart history / crushing quality). The exception here
+               is only TWO conditions -- it is NOT the full 3-condition GERD
+               rule."
+        when:
+          all:
+            - [duration, "==", over_5_min]
+            - [onset_hours_ago, "<=", 72]
+          none:
+            - all:
+                - [heartburn_exact_match, "==", true]
+                - [sour_taste_in_mouth, "==", true]
+        care_advice: [42, 87, 17, 1]
+
+      - id: educ_triager_very_sick
+        protocol: "Patient sounds very sick or weak to the triager"
+        triager_judgment: true
+        when: {all: [[triager_assessment_very_sick_weak, "==", true]]}
+        care_advice: [42, 87, 80, 17, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: SEE_PCP_WITHIN_24_HOURS
+    rules:
+      - id: pcp24_old_resolved_prolonged_pain
+        protocol: "[1] Chest pain lasted > 5 min AND [2] occurred > 3 days ago
+                   (72 h) AND [3] NO chest pain or cardiac symptoms now"
+        when:
+          all:
+            - [duration, "==", over_5_min]
+            - [onset_hours_ago, ">", 72]
+            - [chest_pain_present_now, "==", false]
+            - [cardiac_symptoms_present_now, "==", false]
+        care_advice: [44, 6, 1]
+
+      - id: pcp24_brief_pain_resolved
+        protocol: "[1] Chest pain lasted < 5 min AND [2] NO chest pain or
+                   cardiac symptoms (e.g. breathing difficulty, sweating) now.
+                   Exception: chest pains that last only a few seconds."
+        when:
+          all:
+            - [duration, "==", under_5_min]
+            - [chest_pain_present_now, "==", false]
+            - [cardiac_symptoms_present_now, "==", false]
+          none:
+            - [duration, "==", few_seconds]     # redundant under A3, kept for fidelity
+        care_advice: [44, 11, 1]
+
+      - id: pcp24_fever
+        protocol: "Fever > 100.4 F (38.0 C)"
+        when: {all: [[temperature_f, ">", 100.4]]}
+        rule_out: [pneumonia, pericarditis]
+        care_advice: [44, 1003, 1006, 11, 1]
+
+      - id: pcp24_rash_at_pain_site
+        protocol: "Rash in same area as pain (may be 'small blisters')"
+        when: {all: [[rash_at_pain_site, "==", true]]}
+        rule_out: [herpes_zoster]
+        care_advice: [44, 1001, 1004, 2151, 89, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: CALL_PCP_WITHIN_24_HOURS
+    rules:
+      - id: cpcp24_gerd
+        protocol: "[1] Chest pain feels exactly the same as previously
+                   diagnosed 'heartburn' AND [2] burning in chest AND
+                   [3] accompanying sour taste in mouth"
+        note: "THE ONLY rule that concludes GERD. All three atoms must be
+               explicitly TRUE. Never a default; this is an exception carved
+               out of the higher tiers, not a starting assumption."
+        when:
+          all:
+            - [heartburn_exact_match, "==", true]
+            - [burning_in_chest, "==", true]
+            - [sour_taste_in_mouth, "==", true]
+        rule_out: [gastroesophageal_reflux_disease]
+        care_advice: [50, 1155, 14, 1437, 6, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: SEE_PCP_WITHIN_3_DAYS
+    rules:
+      - id: pcp3_stable_angina_nitro_not_taken
+        protocol: "[1] Chest pain lasting < 5 min AND [2] has not taken
+                   prescribed nitroglycerin"
+        when:
+          all:
+            - [duration, "==", under_5_min]
+            - [nitroglycerin_status, "==", prescribed_not_taken]
+        rule_out: [stable_angina]
+        care_advice: [45, 18, 19, 9, 10, 1]
+
+      - id: pcp3_stable_angina_nitro_resolved
+        protocol: "[1] Chest pain lasting < 5 min AND [2] completely gone after
+                   taking nitroglycerin"
+        note: "Largely SHADOWED by pcp24_brief_pain_resolved: if the pain is
+               fully gone and no cardiac symptom persists, that higher (24 h)
+               rule matches first, which is protocol-faithful (it is listed
+               above this one). This rule is only reached while a cardiac
+               symptom is still present. Both are conservative PCP referrals,
+               so the practical effect is small. Documented, not forced."
+        when:
+          all:
+            - [duration, "==", under_5_min]
+            - [nitroglycerin_status, "==", taken_resolved]
+        rule_out: [stable_angina]
+        care_advice: [45, 7, 9, 10, 1]
+
+      - id: pcp3_known_stable_angina
+        protocol: "[1] Chest pain from KNOWN angina comes and goes AND [2] is
+                   NOT happening more often or getting worse"
+        when:
+          all:
+            - [pattern_comes_and_goes, "==", true]
+            - [known_angina_history, "==", true]
+            - [pattern_worsening, "==", false]
+        rule_out: [stable_angina]
+        care_advice: [45, 87, 6, 1]
+
+      - id: pcp3_cough_fleeting_persistent
+        protocol: "[1] Chest pains lasting a few seconds from coughing AND
+                   [2] persist > 3 days"
+        when:
+          all:
+            - [duration, "==", few_seconds]
+            - [pain_caused_by_coughing, "==", true]
+            - [onset_hours_ago, ">", 72]
+        care_advice: [45, 1001, 1004, 144, 145, 147, 148, 8, 1]
+
+      - id: pcp3_fleeting_persistent
+        protocol: "[1] Chest pains lasting a few seconds AND [2] persist > 3 days"
+        when:
+          all:
+            - [duration, "==", few_seconds]
+            - [onset_hours_ago, ">", 72]
+        rule_out: [chest_wall_pain]
+        care_advice: [45, 1001, 1004, 8, 1]
+
+  # ---------------------------------------------------------------------------
+  - name: HOME_CARE
+    rules:
+      - id: home_cough_fleeting
+        protocol: "Chest pains lasting a few seconds from coughing"
+        when:
+          all:
+            - [duration, "==", few_seconds]
+            - [pain_caused_by_coughing, "==", true]
+        rule_out: [bronchial_irritation, chest_wall_pain]
+        care_advice: [48, 2, 1001, 1004, 144, 145, 147, 148, 5, 4, 1]
+
+      - id: home_fleeting
+        protocol: "Chest pains lasting a few seconds"
+        when:
+          all:
+            - [duration, "==", few_seconds]
+        rule_out: [chest_wall_pain]
+        care_advice: [48, 3, 1001, 1004, 5, 4, 1]
