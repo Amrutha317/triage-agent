@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Personal / process artifacts -- not part of the deliverable
+docs/interview-qa.pdf
+docs/rules_yaml_verification_checklist.xlsx
+docs/~$*.xlsx
+
+# Dev-mode eval output (oracle/offline runs) -- only real pod results ship
+outputs/*offline*.json
+
+# Model artifacts -- large binaries, never belong in git
+adapters/
+*.safetensors
+*.bin
+*.gguf
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
