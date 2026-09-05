@@ -86,6 +86,12 @@ if [ "$SKIP_INSTALL" != "1" ]; then
   # upstream already pulled numpy>=2.0 into the environment.
   pip install -q "numpy==1.26.4"
 
+  # httpx pinned explicitly -- openai==1.54.3's client constructs its
+  # internal httpx.Client with a `proxies=` kwarg that httpx>=0.28 removed,
+  # raising "TypeError: Client.__init__() got an unexpected keyword
+  # argument 'proxies'" the first time llm_client.py makes a call. Nothing
+  # else in this list pins httpx, so an unpinned resolve can silently grab
+  # a too-new one.
   pip install -q \
     "torch==2.4.0" \
     "torchvision==0.19.0" \
@@ -93,6 +99,7 @@ if [ "$SKIP_INSTALL" != "1" ]; then
     "outlines==0.0.46" \
     "xformers==0.0.27.post2" \
     "openai==1.54.3" \
+    "httpx==0.27.2" \
     "gradio==4.44.1" \
     "transformers==4.45.2" \
     "tokenizers==0.20.3" \
@@ -112,11 +119,16 @@ if [ "$SKIP_INSTALL" != "1" ]; then
   pip install -q "pyairports @ git+https://github.com/ozeliger/pyairports.git"
 
   echo "--- verifying environment ---"
+  # NOTE: outlines==0.0.46 does not expose __version__ -- only import-check
+  # it, don't print/assert a version string for it. Under `set -e` an
+  # AttributeError here silently aborts the whole bootstrap run before vLLM
+  # is ever started, which looks like nothing happened at all.
   python -c "
-import numpy, torch, outlines, vllm
+import numpy, torch, outlines, vllm, openai, httpx
 assert numpy.__version__.startswith('1.26'), f'numpy drifted: {numpy.__version__}'
 assert torch.__version__.startswith('2.4.0'), f'torch drifted: {torch.__version__}'
-print(f'numpy {numpy.__version__}  torch {torch.__version__}  outlines {outlines.__version__}  vllm {vllm.__version__}  OK')
+print(f'numpy {numpy.__version__}  torch {torch.__version__}  outlines OK  '
+      f'vllm {vllm.__version__}  openai {openai.__version__}  httpx {httpx.__version__}  OK')
 "
   echo "--- deps installed and verified ---"
 else
