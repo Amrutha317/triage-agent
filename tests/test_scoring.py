@@ -32,10 +32,20 @@ def test_enum_set_order_independent():
     assert values_equal("radiation_sites", ["arm", "jaw"], ["arm"]) is False
 
 
-def test_int_exact_for_age_and_severity():
+def test_int_exact_for_age():
     assert values_equal("age", 58, 58) is True
     assert values_equal("age", 58, 59) is False
-    assert values_equal("severity_1_10", 7, 8) is False
+
+
+def test_severity_has_a_one_point_tolerance():
+    # categorical language ("excruciating") maps to one gold number, but
+    # 8/9/10 are clinically identical under the protocol's own severe band
+    # and drive the same disposition -- exact match would fail a
+    # clinically-correct answer that landed on a different point in-band.
+    assert values_equal("severity_1_10", 9, 8) is True
+    assert values_equal("severity_1_10", 9, 10) is True
+    assert values_equal("severity_1_10", 9, 7) is False   # crosses out of tolerance
+    assert values_equal("severity_1_10", 7, 8) is True    # adjacent still counts
 
 
 def test_onset_hours_tolerant():
@@ -76,14 +86,15 @@ def test_missing_and_spurious():
 
 
 def test_slot_error_that_does_not_change_disposition():
-    # severity 7 vs 8, radiation superset -> both still GO_TO_ED_NOW
+    # severity 10 vs 8: outside the +-1 tolerance so still flagged "wrong" at
+    # the slot level, but both are >= 8 ("severe") -> same disposition either way
     g = {"chest_pain_present_now": True, "duration": "under_5_min",
-         "severity_1_10": 9}
+         "severity_1_10": 10}
     p = {"chest_pain_present_now": True, "duration": "under_5_min",
          "severity_1_10": 8}
     rs = score_row(g, p)
     assert rs.wrong == ["severity_1_10"]
-    assert rs.disp_match is True          # 8 and 9 are both "severe" -> ED
+    assert rs.disp_match is True          # 8 and 10 are both "severe" -> ED
 
 
 def test_slot_error_that_flips_disposition_is_caught():

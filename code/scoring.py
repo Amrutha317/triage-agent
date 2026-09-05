@@ -38,7 +38,13 @@ _UNSCORED = {sid for sid, s in S.SLOTS_BY_ID.items() if s.type == S.TEXT}
 # Numeric tolerance per slot: equal if |g-p| <= abs_tol OR <= rel_tol*max(|g|,|p|)
 _NUM_TOL: dict[str, tuple[float, float]] = {
     "age": (0, 0.0),
-    "severity_1_10": (0, 0.0),
+    # +-1 not 0: categorical language ("unbearable", "excruciating") maps to a
+    # single gold number, but 8/9/10 are clinically identical under the
+    # protocol's own severe band (8-10) and drive the identical disposition
+    # (ed_severe_pain: severity_1_10 >= 8). Exact-match would fail a
+    # clinically-correct answer that just picked a different point in the
+    # same band as the gold label.
+    "severity_1_10": (1, 0.0),
     "heart_rate_bpm": (5, 0.0),
     "temperature_f": (0.3, 0.0),
     "onset_hours_ago": (0.5, 0.25),
