@@ -81,7 +81,7 @@
 {"tag": "history_negative_emphatic", "patient_text": "No, never had any heart trouble in my life.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false}}
 {"tag": "history_bypass", "patient_text": "I had a triple bypass back in 2019.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
 {"tag": "history_nitro_implies", "patient_text": "I keep nitroglycerin spray for my heart.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
-{"tag": "history_negation_trap", "patient_text": "My father had heart disease, but I've never been diagnosed with anything.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false, "cardiac_risk_factors": ["strong_family_history"]}}
+{"tag": "history_negation_trap", "patient_text": "My father had a heart attack when he was 58, but I've never been diagnosed with anything myself.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false, "cardiac_risk_factors": ["strong_family_history"]}}
 {"tag": "history_risk_not_disease", "patient_text": "I've got high blood pressure but no actual heart condition.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false, "cardiac_risk_factors": ["hypertension"]}}
 {"tag": "severity_categorical_severe", "patient_text": "It's unbearable, I can't do anything at all, I'm just lying here.", "known_slots": {}, "gold_slots": {"severity_1_10": 9}}
 {"tag": "severity_categorical_severe", "patient_text": "Excruciating. I've never felt anything like it.", "known_slots": {}, "gold_slots": {"severity_1_10": 9}}
