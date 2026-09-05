@@ -251,13 +251,19 @@ class LLMClient:
         guided_json: dict | None = None,
     ) -> LLMResult:
         last_err = ""
+        # The JSON schema stays attached on EVERY attempt. The old code
+        # dropped it on retries (falling back to response_format=json_object,
+        # which guarantees valid JSON but NOT schema conformance) -- silently,
+        # with nothing recorded. That made a "succeeded on retry, unconstrained"
+        # call indistinguishable from a clean one, and is a plausible
+        # mechanical cause of a missed `severe_difficulty_breathing` /
+        # `life_threatening` flag. If the server genuinely can't do guided
+        # decoding we want a loud ok=False, not a quiet schema-less success.
+        extra: dict = {}
+        if guided_json is not None:
+            extra["extra_body"] = {"guided_json": guided_json}
+
         for attempt in range(self.max_retries + 1):
-            extra: dict = {}
-            if guided_json is not None and attempt == 0:
-                extra["extra_body"] = {"guided_json": guided_json}
-            elif guided_json is not None:
-                # fallback for servers without guided_json
-                extra["response_format"] = {"type": "json_object"}
             try:
                 start = time.perf_counter()
                 first: float | None = None
@@ -281,6 +287,7 @@ class LLMClient:
                     ttft_seconds=(first - start) if first else None,
                     total_seconds=end - start,
                     ok=True,
+                    meta={"retried": attempt > 0, "attempts": attempt + 1},
                 )
             except Exception as e:  # noqa: BLE001
                 last_err = f"{type(e).__name__}: {e}"
