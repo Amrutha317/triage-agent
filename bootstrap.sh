@@ -2,7 +2,7 @@
 # =============================================================================
 # bootstrap.sh -- one-shot setup for a fresh RunPod (or any Linux+NVIDIA) pod.
 #
-#   1. installs every Python dep the whole project needs
+#   1. creates an isolated .venv and installs every pinned dep the project needs
 #   2. starts vLLM as an OpenAI-compatible server on :8000 (background)
 #   3. waits until it answers, prints a test curl
 #
@@ -12,6 +12,10 @@
 #   SKIP_INSTALL=1 bash bootstrap.sh  # just (re)start the server
 #   SERVE=0 bash bootstrap.sh         # install only, don't start vLLM
 #   LORA_DIR=adapters/triage-lora bash bootstrap.sh   # serve base + LoRA adapter
+#
+# Versions below are frozen from a confirmed-working run (2026-09-05) --
+# do NOT `pip install -U` anything in this stack ad hoc. If you need a newer
+# package, update the pin here, re-verify end to end, and re-freeze.
 #
 # If you get "bad interpreter": run  sed -i 's/\r$//' bootstrap.sh  first
 # (Windows line endings).
@@ -42,17 +46,57 @@ esac
 command -v nvidia-smi >/dev/null && nvidia-smi --query-gpu=name,memory.total --format=csv || \
   echo "WARNING: nvidia-smi not found -- no GPU?"
 
-# --- 1. deps ----------------------------------------------------------------
+# --- 0. clear any leftover GPU-resident process from a prior crashed run ----
+# vLLM's engine runs as a separate multiprocessing.spawn subprocess. If a
+# previous `vllm serve` died uncleanly, `pkill -f "vllm serve"` alone won't
+# catch it (its cmdline is the spawn bootstrap, not "vllm serve"), and it
+# will silently hold GPU memory, causing a CUDA OOM on the next start.
+echo "--- clearing any stale vLLM / GPU processes ---"
+pkill -9 -f "vllm serve" 2>/dev/null || true
+pkill -9 -f "multiprocessing.spawn" 2>/dev/null || true
+sleep 2
+if command -v nvidia-smi >/dev/null; then
+  nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader 2>/dev/null | \
+    while IFS=, read -r pid mem; do
+      pid="$(echo "$pid" | tr -d ' ')"
+      [ -n "$pid" ] && { echo "  killing stale GPU process $pid ($mem)"; kill -9 "$pid" 2>/dev/null || true; }
+    done
+  sleep 1
+fi
+
+# --- 1. venv + pinned deps ---------------------------------------------------
+# NOTE: everything installs into an isolated .venv, not the system/base
+# Python. Do not `pip install -U vllm` (or anything else) outside this venv
+# and expect it to stay compatible -- numpy/torch/outlines have narrow
+# mutually-compatible version windows and an out-of-band upgrade WILL break
+# this the same way it did before (numpy>=2.0 breaks outlines==0.0.46;
+# torch!=2.4.0 breaks vllm==0.6.3 / xformers==0.0.27.post2).
 if [ "$SKIP_INSTALL" != "1" ]; then
+  echo "--- creating venv ---"
+  python3 -m venv .venv
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+
   echo "--- installing python deps (a few minutes) ---"
   export HF_HUB_ENABLE_HF_TRANSFER=1
   pip install -q --upgrade pip
-  # torch is preinstalled on RunPod PyTorch templates; vllm pulls a matching one if not
+
+  # numpy pinned FIRST and explicitly -- outlines==0.0.46 requires numpy<2.0
+  # and nothing later in this list will force it back down if something
+  # upstream already pulled numpy>=2.0 into the environment.
+  pip install -q "numpy==1.26.4"
+
   pip install -q \
+    "torch==2.4.0" \
+    "torchvision==0.19.0" \
     "vllm==0.6.3" \
+    "outlines==0.0.46" \
+    "xformers==0.0.27.post2" \
     "openai==1.54.3" \
     "gradio==4.44.1" \
     "transformers==4.45.2" \
+    "tokenizers==0.20.3" \
+    "huggingface_hub==0.36.2" \
     "peft==0.13.2" \
     "trl==0.11.4" \
     "accelerate==1.0.1" \
@@ -61,7 +105,23 @@ if [ "$SKIP_INSTALL" != "1" ]; then
     "pyyaml==6.0.2" \
     "pytest==8.3.3" \
     "huggingface_hub[hf_transfer]"
-  echo "--- deps installed ---"
+
+  # pyairports is NOT on PyPI under a compatible name -- it must come from
+  # this git ref, or outlines' guided-decoding import path breaks with
+  # "ModuleNotFoundError: No module named 'pyairports'" at server startup.
+  pip install -q "pyairports @ git+https://github.com/ozeliger/pyairports.git"
+
+  echo "--- verifying environment ---"
+  python -c "
+import numpy, torch, outlines, vllm
+assert numpy.__version__.startswith('1.26'), f'numpy drifted: {numpy.__version__}'
+assert torch.__version__.startswith('2.4.0'), f'torch drifted: {torch.__version__}'
+print(f'numpy {numpy.__version__}  torch {torch.__version__}  outlines {outlines.__version__}  vllm {vllm.__version__}  OK')
+"
+  echo "--- deps installed and verified ---"
+else
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
 fi
 
 # Optional: gated models (Llama). Export HF_TOKEN before running, or run
@@ -81,8 +141,9 @@ if [ "$SERVE" != "1" ]; then
   exit 0
 fi
 
-# kill any previous server on this port
-pkill -f "vllm serve" 2>/dev/null || true
+# kill any previous server on this port (belt-and-suspenders with step 0)
+pkill -9 -f "vllm serve" 2>/dev/null || true
+pkill -9 -f "multiprocessing.spawn" 2>/dev/null || true
 sleep 2
 
 CMD=(vllm serve "$MODEL"
