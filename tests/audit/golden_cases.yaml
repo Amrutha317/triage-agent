@@ -1,0 +1,159 @@
+# Golden cases. Each pins BOTH the disposition and the rule id that produced
+# it, so "right answer for the wrong reason" fails loudly.
+#
+# `protocol_says` records what a strict reading of the PDF gives, so any case
+# where it differs from `expect` is a documented deviation, not a silent one.
+
+cases:
+  # --- the A1 probe: does adding "pain present now" downgrade real EMS cases?
+  - name: A1_high_risk_pain_resolved_30min_ago
+    why: "55yo, crushing 20-min pain, stopped 30 min ago. Protocol EMS line
+          p_ems_05/08 has no 'now' requirement; A1 adds one."
+    slots:
+      chest_pain_present_now: false
+      cardiac_symptoms_present_now: false
+      duration: over_5_min
+      onset_hours_ago: 0.5
+      age: 55
+      pain_qualities: [crushing]
+      severity_1_10: 6
+    protocol_says: CALL_EMS_911_NOW
+    expect: GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    expect_rule: educ_recent_prolonged_pain
+
+  - name: A1_high_risk_pain_present_now
+    why: "Same patient, pain ongoing. Must be 911."
+    slots:
+      chest_pain_present_now: true
+      duration: over_5_min
+      onset_hours_ago: 0.5
+      age: 55
+      pain_qualities: [crushing]
+    protocol_says: CALL_EMS_911_NOW
+    expect: CALL_EMS_911_NOW
+    expect_rule: ems_prolonged_pain_age
+
+  - name: A1_old_resolved_episode_stays_pcp24
+    why: "The case A1 was written to protect. Without A1 this would hit EMS."
+    slots:
+      chest_pain_present_now: false
+      cardiac_symptoms_present_now: false
+      duration: over_5_min
+      onset_hours_ago: 120
+      age: 55
+    protocol_says: SEE_PCP_WITHIN_24_HOURS
+    expect: SEE_PCP_WITHIN_24_HOURS
+    expect_rule: pcp24_old_resolved_prolonged_pain
+
+  # --- severe pain expressed categorically, not numerically
+  - name: severe_pain_no_number_given
+    why: "Patient says 'unbearable, can't stand up' but gives no 1-10 score.
+          ed_severe_pain reads severity_1_10 only."
+    slots:
+      chest_pain_present_now: true
+      duration: under_5_min
+      severity_category: severe
+      age: 30
+    protocol_says: GO_TO_ED_NOW
+    expect: null            # currently falls through -- no disposition
+    expect_rule: null
+
+  # --- the hole found by C7
+  - name: ongoing_brief_pain_no_red_flags
+    why: "Ongoing sub-5-min pain, no nitro history, no red flags. No rule matches."
+    slots:
+      chest_pain_present_now: true
+      cardiac_symptoms_present_now: true
+      duration: under_5_min
+      onset_hours_ago: 2
+      age: 25
+      cardiac_risk_factors: []
+      history_of_heart_disease: false
+      severity_1_10: 3
+      pattern_comes_and_goes: true
+      pattern_worsening: false
+      nitroglycerin_status: none
+      known_angina_history: false
+    protocol_says: "ambiguous -- triager judgment"
+    expect: null
+    expect_rule: null
+
+  # --- PE care-advice fidelity
+  - name: pe_cancer_care_advice
+    why: "Protocol p_ed_13 gives CA 41,81,1 only. The old merged rule emitted
+          41,80,81,84,17,1 for every PE-risk factor including cancer. Fixed by
+          splitting into 3 rules by CA group (ed_pe_risk_cancer is its own rule
+          now, not resolved in code) -- a static YAML-only checker like this
+          one can verify it directly."
+    slots:
+      chest_pain_present_now: true
+      duration: under_5_min
+      pe_risk_factors: [cancer_active_or_treated_6mo]
+      age: 60
+    protocol_says: GO_TO_ED_NOW
+    expect: GO_TO_ED_NOW
+    expect_rule: ed_pe_risk_cancer
+    expect_care_advice: [41, 81, 1]
+
+  # --- GERD must never be a default
+  - name: gerd_only_with_all_three
+    why: "Burning + sour taste but NOT 'exactly like known heartburn'.
+          Must not land in CALL_PCP_WITHIN_24_HOURS."
+    slots:
+      chest_pain_present_now: true
+      duration: over_5_min
+      onset_hours_ago: 3
+      age: 52
+      burning_in_chest: true
+      sour_taste_in_mouth: true
+      heartburn_exact_match: false
+    protocol_says: CALL_EMS_911_NOW
+    expect: CALL_EMS_911_NOW
+    expect_rule: ems_prolonged_pain_age
+
+  # --- fleeting pain floor
+  - name: fleeting_cough_pain_new
+    slots:
+      chest_pain_present_now: true
+      duration: few_seconds
+      pain_caused_by_coughing: true
+      onset_hours_ago: 12
+      severity_1_10: 2
+      age: 40
+    protocol_says: HOME_CARE
+    expect: HOME_CARE
+    expect_rule: home_cough_fleeting
+
+  - name: fleeting_pain_persistent_4_days
+    slots:
+      chest_pain_present_now: true
+      duration: few_seconds
+      pain_caused_by_coughing: false
+      onset_hours_ago: 96
+      severity_1_10: 2
+      age: 40
+    protocol_says: SEE_PCP_WITHIN_3_DAYS
+    expect: SEE_PCP_WITHIN_3_DAYS
+    expect_rule: pcp3_fleeting_persistent
+
+  # --- red flag must short-circuit everything below it
+  - name: red_flag_beats_benign_picture
+    why: "Monotonicity: adding a red flag must never route lower."
+    slots:
+      chest_pain_present_now: true
+      duration: few_seconds
+      severe_difficulty_breathing: true
+      age: 22
+    protocol_says: CALL_EMS_911_NOW
+    expect: CALL_EMS_911_NOW
+    expect_rule: ems_severe_dyspnea
+
+  - name: injury_is_out_of_scope
+    slots:
+      followed_chest_injury: true
+      chest_pain_present_now: true
+      duration: over_5_min
+      age: 50
+    protocol_says: SEE_MORE_APPROPRIATE_GUIDELINE
+    expect: CALL_EMS_911_NOW     # EMS tier is ordered above the redirect
+    expect_rule: ems_prolonged_pain_age

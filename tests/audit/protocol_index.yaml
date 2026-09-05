@@ -1,0 +1,278 @@
+# =============================================================================
+# protocol_index.yaml
+#
+# A flat, hand-transcribed index of EVERY triage rule in
+#   "Chest Pain - After Hours Telehealth Triage Guidelines | Adult | 2026"
+#   (Schmitt-Thompson Clinical Content)
+#
+# This file is the GROUND TRUTH. It is transcribed from the PDF only -- it
+# knows nothing about rules.yaml. check_rules.py diffs rules.yaml against it.
+#
+# Each entry:
+#   id           stable handle for this protocol line
+#   tier         the disposition heading it appears under
+#   text         the protocol wording (abbreviated)
+#   care_advice  the CA: codes printed under that line, in order
+#   maps_to      which rules.yaml rule id is claimed to implement it
+#                (null = deliberately not implemented; must be justified)
+# =============================================================================
+
+tier_order:
+  - CALL_EMS_911_NOW
+  - SEE_MORE_APPROPRIATE_GUIDELINE
+  - GO_TO_ED_NOW
+  - GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+  - SEE_PCP_WITHIN_24_HOURS
+  - CALL_PCP_WITHIN_24_HOURS
+  - SEE_PCP_WITHIN_3_DAYS
+  - HOME_CARE
+
+rules:
+
+  # --- Call EMS 911 Now (11 lines) -------------------------------------------
+  - id: p_ems_01
+    tier: CALL_EMS_911_NOW
+    text: "SEVERE difficulty breathing (struggling for each breath, speaks in single words)"
+    care_advice: [40, 1]
+    maps_to: ems_severe_dyspnea
+
+  - id: p_ems_02
+    tier: CALL_EMS_911_NOW
+    text: "Difficult to awaken or acting confused (disoriented, slurred speech)"
+    care_advice: [40, 1045, 1]
+    maps_to: ems_altered_mental_status
+
+  - id: p_ems_03
+    tier: CALL_EMS_911_NOW
+    text: "Shock suspected (cold/pale/clammy skin, too weak to stand, low BP, rapid pulse)"
+    care_advice: [40, 1045, 1]
+    maps_to: ems_shock
+
+  - id: p_ems_04
+    tier: CALL_EMS_911_NOW
+    text: "Passed out (fainted, lost consciousness, blacked out and was not responding)"
+    care_advice: [40, 1045, 1]
+    maps_to: ems_syncope
+
+  - id: p_ems_05
+    tier: CALL_EMS_911_NOW
+    text: "[1] Chest pain lasts > 5 minutes AND [2] age > 44"
+    care_advice: [40, 1610, 1]
+    maps_to: ems_prolonged_pain_age
+
+  - id: p_ems_06
+    tier: CALL_EMS_911_NOW
+    text: "[1] Chest pain lasts > 5 minutes AND [2] age > 30 AND [3] one or more cardiac risk factors"
+    care_advice: [40, 1610, 1]
+    maps_to: ems_prolonged_pain_risk_factors
+
+  - id: p_ems_07
+    tier: CALL_EMS_911_NOW
+    text: "[1] Chest pain lasts > 5 minutes AND [2] history of heart disease"
+    care_advice: [40, 1610, 1]
+    maps_to: ems_prolonged_pain_known_heart_disease
+
+  - id: p_ems_08
+    tier: CALL_EMS_911_NOW
+    text: "[1] Chest pain lasts > 5 minutes AND [2] described as crushing, pressure-like, or heavy"
+    care_advice: [40, 1610, 1]
+    maps_to: ems_prolonged_pain_crushing_quality
+
+  - id: p_ems_09
+    tier: CALL_EMS_911_NOW
+    text: "Heart beating < 50 bpm OR > 140 bpm"
+    care_advice: [40, 1]
+    maps_to: ems_abnormal_heart_rate
+
+  - id: p_ems_10
+    tier: CALL_EMS_911_NOW
+    text: "Visible sweat on face or sweat dripping down face"
+    care_advice: [40, 1]
+    maps_to: ems_visible_diaphoresis
+
+  - id: p_ems_11
+    tier: CALL_EMS_911_NOW
+    text: "Sounds like a life-threatening emergency to the triager"
+    care_advice: [40, 1]
+    maps_to: ems_triager_life_threatening
+
+  # --- See More Appropriate Guideline (1 line) --------------------------------
+  - id: p_guide_01
+    tier: SEE_MORE_APPROPRIATE_GUIDELINE
+    text: "Followed a chest injury -> Chest Injury (Adult)"
+    care_advice: []
+    maps_to: injury_redirect
+
+  # --- Go to ED Now (13 lines) ------------------------------------------------
+  - id: p_ed_01
+    tier: GO_TO_ED_NOW
+    text: "SEVERE chest pain"
+    care_advice: [41, 92, 81, 84, 17, 1]
+    maps_to: ed_severe_pain
+
+  - id: p_ed_02
+    tier: GO_TO_ED_NOW
+    text: "[1] Chest pain (or angina) comes and goes AND [2] increasing in frequency or severity (Exception: lasts only a few seconds)"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_worsening_angina
+
+  - id: p_ed_03
+    tier: GO_TO_ED_NOW
+    text: "Pain also in shoulder(s) or arm(s) or jaw (Exception: clearly made worse by movement)"
+    care_advice: [41, 92, 81, 17, 1]
+    maps_to: ed_radiation_to_shoulder_arm_jaw
+
+  - id: p_ed_04
+    tier: GO_TO_ED_NOW
+    text: "Difficulty breathing"
+    care_advice: [41, 92, 81, 84, 17, 1]
+    maps_to: ed_difficulty_breathing
+
+  - id: p_ed_05
+    tier: GO_TO_ED_NOW
+    text: "Coughing up blood"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_hemoptysis
+
+  - id: p_ed_06
+    tier: GO_TO_ED_NOW
+    text: "Cocaine use within last 3 days"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_cocaine_use
+
+  - id: p_ed_07
+    tier: GO_TO_ED_NOW
+    text: "Major surgery in past month"
+    care_advice: [41, 80, 81, 17, 1]
+    maps_to: ed_pe_risk_surgery_or_clotting_disorder
+
+  - id: p_ed_08
+    tier: GO_TO_ED_NOW
+    text: "Hip or leg fracture in past month (or cast on leg/ankle)"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_pe_risk_immobility_or_clot_history
+
+  - id: p_ed_09
+    tier: GO_TO_ED_NOW
+    text: "Illness requiring prolonged bedrest in past month"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_pe_risk_immobility_or_clot_history
+
+  - id: p_ed_10
+    tier: GO_TO_ED_NOW
+    text: "Long-distance travel in past month (trip >= 6 hours)"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_pe_risk_immobility_or_clot_history
+
+  - id: p_ed_11
+    tier: GO_TO_ED_NOW
+    text: "History of prior blood clot in leg or lungs (DVT/PE)"
+    care_advice: [41, 80, 81, 84, 17, 1]
+    maps_to: ed_pe_risk_immobility_or_clot_history
+
+  - id: p_ed_12
+    tier: GO_TO_ED_NOW
+    text: "History of inherited increased risk of blood clots (Factor V Leiden, AT-III, Protein C/S, prothrombin mutation)"
+    care_advice: [41, 80, 81, 17, 1]
+    maps_to: ed_pe_risk_surgery_or_clotting_disorder
+
+  - id: p_ed_13
+    tier: GO_TO_ED_NOW
+    text: "Cancer treatment in past six months (or has cancer now)"
+    care_advice: [41, 81, 1]
+    maps_to: ed_pe_risk_cancer
+
+  # --- Go to ED/UCC Now (or PCP Triage) (3 lines) -----------------------------
+  - id: p_educ_01
+    tier: GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    text: "Taking a deep breath makes pain worse"
+    care_advice: [42, 87, 17, 1]
+    maps_to: educ_pleuritic_pain
+
+  - id: p_educ_02
+    tier: GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    text: "[1] Chest pain lasts > 5 minutes AND [2] occurred in past 3 days (Exception: exactly like known heartburn with sour taste)"
+    care_advice: [42, 87, 17, 1]
+    maps_to: educ_recent_prolonged_pain
+
+  - id: p_educ_03
+    tier: GO_TO_ED_UCC_NOW_OR_PCP_TRIAGE
+    text: "Patient sounds very sick or weak to the triager"
+    care_advice: [42, 87, 80, 17, 1]
+    maps_to: educ_triager_very_sick
+
+  # --- See PCP Within 24 Hours (4 lines) --------------------------------------
+  - id: p_pcp24_01
+    tier: SEE_PCP_WITHIN_24_HOURS
+    text: "[1] Chest pain lasts > 5 minutes AND [2] occurred > 3 days ago AND [3] NO chest pain or cardiac symptoms now"
+    care_advice: [44, 6, 1]
+    maps_to: pcp24_old_resolved_prolonged_pain
+
+  - id: p_pcp24_02
+    tier: SEE_PCP_WITHIN_24_HOURS
+    text: "[1] Chest pain lasts < 5 minutes AND [2] NO chest pain or cardiac symptoms now (Exception: lasts only a few seconds)"
+    care_advice: [44, 11, 1]
+    maps_to: pcp24_brief_pain_resolved
+
+  - id: p_pcp24_03
+    tier: SEE_PCP_WITHIN_24_HOURS
+    text: "Fever > 100.4 F (38.0 C)"
+    care_advice: [44, 1003, 1006, 11, 1]
+    maps_to: pcp24_fever
+
+  - id: p_pcp24_04
+    tier: SEE_PCP_WITHIN_24_HOURS
+    text: "Rash in same area as pain"
+    care_advice: [44, 1001, 1004, 2151, 89, 1]
+    maps_to: pcp24_rash_at_pain_site
+
+  # --- Call PCP Within 24 Hours (1 line) --------------------------------------
+  - id: p_cpcp24_01
+    tier: CALL_PCP_WITHIN_24_HOURS
+    text: "[1] Feels exactly the same as previously diagnosed heartburn AND [2] burning in chest AND [3] sour taste in mouth"
+    care_advice: [50, 1155, 14, 1437, 6, 1]
+    maps_to: cpcp24_gerd
+
+  # --- See PCP Within 3 Days (5 lines) ----------------------------------------
+  - id: p_pcp3_01
+    tier: SEE_PCP_WITHIN_3_DAYS
+    text: "[1] Chest pain lasting < 5 minutes AND [2] has not taken prescribed nitroglycerin"
+    care_advice: [45, 18, 19, 9, 10, 1]
+    maps_to: pcp3_stable_angina_nitro_not_taken
+
+  - id: p_pcp3_02
+    tier: SEE_PCP_WITHIN_3_DAYS
+    text: "[1] Chest pain lasting < 5 minutes AND [2] completely gone after taking nitroglycerin"
+    care_advice: [45, 7, 9, 10, 1]
+    maps_to: pcp3_stable_angina_nitro_resolved
+
+  - id: p_pcp3_03
+    tier: SEE_PCP_WITHIN_3_DAYS
+    text: "[1] Chest pain from known angina comes and goes AND [2] NOT increasing in frequency or severity"
+    care_advice: [45, 87, 6, 1]
+    maps_to: pcp3_known_stable_angina
+
+  - id: p_pcp3_04
+    tier: SEE_PCP_WITHIN_3_DAYS
+    text: "[1] Chest pain(s) lasting a few seconds from coughing AND [2] lasts > 3 days"
+    care_advice: [45, 1001, 1004, 144, 145, 147, 148, 8, 1]
+    maps_to: pcp3_cough_fleeting_persistent
+
+  - id: p_pcp3_05
+    tier: SEE_PCP_WITHIN_3_DAYS
+    text: "[1] Chest pain(s) lasting a few seconds AND [2] lasts > 3 days"
+    care_advice: [45, 1001, 1004, 8, 1]
+    maps_to: pcp3_fleeting_persistent
+
+  # --- Home Care (2 lines) ----------------------------------------------------
+  - id: p_home_01
+    tier: HOME_CARE
+    text: "Chest pain(s) lasting a few seconds from coughing"
+    care_advice: [48, 2, 1001, 1004, 144, 145, 147, 148, 5, 4, 1]
+    maps_to: home_cough_fleeting
+
+  - id: p_home_02
+    tier: HOME_CARE
+    text: "Chest pain(s) lasting a few seconds"
+    care_advice: [48, 3, 1001, 1004, 5, 4, 1]
+    maps_to: home_fleeting
