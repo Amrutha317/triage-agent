@@ -151,7 +151,13 @@ CMD=(vllm serve "$MODEL"
      --served-model-name "$MODEL"
      --dtype auto
      --max-model-len "$MAX_LEN"
-     --gpu-memory-utilization "$GPU_UTIL")
+     --gpu-memory-utilization "$GPU_UTIL"
+     --enable-prefix-caching)
+     # EXTRACT_SYS (~1,600 tokens) and DISTRESS_SYS (~450 tokens) in
+     # llm_client.py are byte-identical on every call -- without prefix
+     # caching, vLLM reprocesses that whole prefix from scratch each time.
+     # This is the single biggest latency lever available and costs nothing
+     # to enable; do this before any other tuning.
 
 if [ -n "$LORA_DIR" ]; then
   CMD+=(--enable-lora --lora-modules "triage-lora=$LORA_DIR" --max-lora-rank 16)

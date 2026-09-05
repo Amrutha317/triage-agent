@@ -31,6 +31,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import concurrent.futures as cf
 import json
 import os
 import statistics
@@ -206,6 +207,11 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--out", default=None, help="write full JSON report here")
     ap.add_argument("--label", default=None, help="model label for the printed report")
+    ap.add_argument("--concurrency", type=int, default=8,
+                    help="scenarios to run in parallel (vLLM batches these "
+                         "server-side; this was previously fully sequential -- "
+                         "one full 8-turn conversation blocking the next). "
+                         "1 = old sequential behavior.")
     args = ap.parse_args()
 
     scenarios = load_scenarios(args.scenarios)
@@ -222,12 +228,23 @@ def main() -> None:
         make_client = lambda facts: shared  # noqa: E731
         label = args.label or shared.model
 
-    print(f"running {len(scenarios)} scenarios ({label})...")
-    rows = []
-    for i, scenario in enumerate(scenarios, 1):
-        rows.append(run_scenario(make_client, scenario))
-        if i % 10 == 0 or i == len(scenarios):
-            print(f"  {i}/{len(scenarios)}")
+    print(f"running {len(scenarios)} scenarios ({label}), "
+          f"concurrency={args.concurrency}...")
+    rows: list[dict] = [None] * len(scenarios)  # type: ignore[list-item]
+    done = 0
+    with cf.ThreadPoolExecutor(max_workers=args.concurrency) as ex:
+        # index-preserving: rows stays in scenario order regardless of which
+        # thread finishes first, but the calls themselves run concurrently --
+        # the openai client is safe to share across threads (each call is a
+        # self-contained sync HTTP round trip with no shared mutable state).
+        futures = {ex.submit(run_scenario, make_client, s): i
+                  for i, s in enumerate(scenarios)}
+        for fut in cf.as_completed(futures):
+            i = futures[fut]
+            rows[i] = fut.result()
+            done += 1
+            if done % 10 == 0 or done == len(scenarios):
+                print(f"  {done}/{len(scenarios)}")
 
     agg = aggregate(rows)
     print()
