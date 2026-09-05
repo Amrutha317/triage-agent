@@ -1,0 +1,9 @@
+# Deterministic core + tests 
+pyyaml==6.0.2
+pytest==8.3.3
+
+# Chat client / eval harness
+openai==1.54.3
+
+# Chat UI
+gradio==4.44.1
