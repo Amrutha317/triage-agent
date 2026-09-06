@@ -29,9 +29,10 @@ def test_harness_metrics_and_detect():
     assert kind == "harness"
     m = fn(rows)
     assert abs(m["triage_accuracy"] - 1 / 3) < 1e-9
-    assert m["red_flag_recall_911"] == 0.5          # 1 of 2 gold-911 caught
-    assert m["under_triage_rate"] == 0.5            # row 2: 911 -> HOME_CARE
-    assert m["over_triage_rate"] == 0.5             # row 3: HOME_CARE -> ED
+    assert m["red_flag_recall_911"] == 0.5              # 1 of 2 gold-911 caught
+    # denominator is all 3 rows (both dispositions rank-known):
+    assert abs(m["under_triage_rate"] - 1 / 3) < 1e-9   # row 2: 911 -> HOME_CARE
+    assert abs(m["over_triage_rate"] - 1 / 3) < 1e-9    # row 3: HOME_CARE -> ED
 
 
 def test_extraction_metrics():
