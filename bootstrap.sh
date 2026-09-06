@@ -33,6 +33,10 @@ SERVE="${SERVE:-1}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 LORA_DIR="${LORA_DIR:-}"
 LOG="${LOG:-vllm.log}"
+# PREFIX_CACHING=0 disables --enable-prefix-caching. Set it if the server starts
+# returning degraded output on a byte-identical prompt (suspected stale prefix
+# KV) -- it trades ~latency for a clean recompute of the system prefix each call.
+PREFIX_CACHING="${PREFIX_CACHING:-1}"
 
 echo "=============================================================="
 echo " model      : $MODEL"
@@ -167,13 +171,17 @@ CMD=(vllm serve "$MODEL"
      --dtype auto
      --max-model-len "$MAX_LEN"
      --gpu-memory-utilization "$GPU_UTIL"
-     --enable-prefix-caching \
      --guided-decoding-backend outlines)
      # EXTRACT_SYS (~1,600 tokens) and DISTRESS_SYS (~450 tokens) in
-     # llm_client.py are byte-identical on every call -- without prefix
-     # caching, vLLM reprocesses that whole prefix from scratch each time.
-     # This is the single biggest latency lever available and costs nothing
-     # to enable; do this before any other tuning.
+     # llm_client.py are byte-identical on every call -- with prefix caching
+     # (default on), vLLM reuses that prefix's KV instead of reprocessing it.
+     # Biggest latency lever available. Disable with PREFIX_CACHING=0 only if
+     # you suspect the cache has gone stale (degraded output on an unchanged
+     # prompt).
+
+if [ "$PREFIX_CACHING" = "1" ]; then
+  CMD+=(--enable-prefix-caching)
+fi
 
 if [ -n "$LORA_DIR" ]; then
   CMD+=(--enable-lora --lora-modules "triage-lora=$LORA_DIR" --max-lora-rank 16)
