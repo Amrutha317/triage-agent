@@ -53,7 +53,7 @@ def test_extraction_metrics():
 
 def test_distress_metrics():
     g1 = {k: False for k in C._DISTRESS_FLAGS}
-    g1["life_threatening"] = True
+    g1["triager_assessment_life_threatening"] = True
     p1 = dict(g1)                                   # perfect
     p2 = {k: False for k in C._DISTRESS_FLAGS}      # missed it
     rows = [{"gold": g1, "pred": p1}, {"gold": g1, "pred": p2}]

@@ -32,9 +32,11 @@ _DISPO_ORDER = [
     "CALL_PCP_WITHIN_24_HOURS", "SEE_PCP_WITHIN_3_DAYS", "HOME_CARE",
 ]
 _RANK = {d: i for i, d in enumerate(_DISPO_ORDER)}
+# the slot ids as eval_distress.py writes them into the result rows
 _DISTRESS_FLAGS = ("severe_difficulty_breathing", "confused_or_hard_to_awaken",
                    "shock_signs", "visible_facial_diaphoresis",
-                   "life_threatening", "very_sick_or_weak")
+                   "triager_assessment_life_threatening",
+                   "triager_assessment_very_sick_weak")
 
 
 # --- metric families: each maps a list[row] -> {metric_name: value|None} ------
@@ -196,7 +198,7 @@ def main() -> None:
     res = bootstrap_pair(da["rows"], db["rows"], fn)
     print(f"A = {fa}")
     print(f"B = {fb}   (n={len(da['rows'])})\n")
-    print(f"  {'metric':24} {'A':>8} {'B':>8} {'Δ(B-A)':>8}   95% CI on Δ        beyond noise?")
+    print(f"  {'metric':24} {'A':>8} {'B':>8} {'d(B-A)':>8}   95% CI on d        beyond noise?")
     for k, (a, b, dd, lo, hi, sig) in res.items():
         ci = f"[{_f(lo)}, {_f(hi)}]" if lo is not None else "n/a"
         print(f"  {k:24} {_f(a):>8} {_f(b):>8} {_f(dd):>8}   {ci:18} {'YES' if sig else 'no'}")
