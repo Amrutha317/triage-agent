@@ -14,36 +14,75 @@ never diagnoses.**
 
 | Component | State |
 |---|---|
-| `code/rules.yaml` — protocol encoded as an ordered decision table | ✅ finalized, 50 tests green |
-| `code/slots.py` — slot schema, ask order, extractor JSON schema | ✅ |
-| `code/decision_engine.py` — pure-Python 3-valued rules evaluator | ✅ |
-| `tests/` — one case per rule + exceptions + ordering + "insufficient info" | ✅ `pytest -q` → 50 passed |
-| `code/state_machine.py` — next-question selection, red-flag short-circuit | ⏳ next |
-| `code/llm_client.py` — slot extractor + distress classifier + NLG | ⏳ |
-| `code/guardrails.py` — output post-filter (no diagnosis, no false reassurance) | ⏳ |
-| `code/app.py` — Gradio chat UI + latency logging | ⏳ |
-| `code/eval_harness.py` + `data/eval/` — triage/workflow accuracy, TTFT, latency | ⏳ |
-| `data/train/` + LoRA fine-tune + baseline-vs-LoRA report | ⏳ |
-| `outputs/accuracy_report.md`, demo video | ⏳ |
+| `code/rules.yaml` + `code/decision_engine.py` + `code/slots.py` — protocol decision table, 3-valued evaluator, slot schema | ✅ |
+| `code/state_machine.py` — next-question selection, red-flag short-circuit, fallback | ✅ |
+| `code/llm_client.py` — slot extractor + distress classifier + question NLG | ✅ |
+| `code/guardrails.py` — output post-filter (no diagnosis, no unbacked reassurance) | ✅ |
+| `code/agent.py` + `code/app.py` — conversation wiring + Gradio chat UI | ✅ |
+| `code/eval_harness.py` + `data/eval/` — triage/workflow accuracy, TTFT, latency | ✅ |
+| `data/train/` + `code/generate_sft_set.py` + `code/finetune_lora.py` — SFT set + QLoRA | ✅ |
+| baseline-vs-LoRA report + CIs (`code/eval_extraction.py`, `eval_distress.py`, `eval_ci.py`) | ✅ |
+| `tests/` — `pytest -q` → **205 passing** | ✅ |
+| CPU-latency row · demo video | ⏳ |
 
-## Run the deterministic core
+## Quick start
 
 ```
-pip install -r requirements.txt
-pytest -q
+pip install -r requirements.txt      # deterministic core + eval client + UI
+pytest -q                            # 205 tests, no GPU / network needed
 ```
 
-## Model selection (planned)
+Everything above the LLM runs offline. To exercise the full LLM pipeline you need a
+vLLM server (a GPU pod — see below).
+
+## Running the full pipeline (GPU pod)
+
+```
+export HF_TOKEN=hf_...                                  # Llama-3.1-8B is gated
+bash bootstrap.sh                                       # .venv + pinned deps + vLLM on :8000
+python code/app.py                                      # Gradio chat UI
+python code/eval_harness.py --out outputs/eval_baseline_all.json --label baseline
+```
+
+Fine-tune + compare (full sequence in `docs/report.md` §9):
+
+```
+python code/generate_sft_set.py                         # -> data/train/sft_v1.jsonl
+python code/finetune_lora.py                            # -> adapters/triage-lora/  (gitignored)
+LORA_DIR=adapters/triage-lora bash bootstrap.sh
+python code/eval_extraction.py --model triage-lora --out outputs/extract_lora.json
+python code/eval_ci.py outputs/extract_base.json outputs/extract_lora.json
+```
+
+The trained adapter is **not committed** (large binary; and the eval found no
+measurable benefit — `docs/finetuning-report.md`). To regenerate the exact reported
+v1 adapter: `git checkout d2aa28d -- code/generate_sft_set.py` then the two commands
+above.
+
+## Model selection
 
 | Role | Model | Why |
 |---|---|---|
-| Primary | `meta-llama/Llama-3.1-8B-Instruct` | Strong instruction-following + constrained-JSON extraction at 8B; fits one A10G for vLLM and QLoRA. |
-| Low-latency comparison | `microsoft/Phi-3.5-mini-instruct` (3.8B) | TTFT / cost floor; shows the accuracy trade-off. |
+| **Primary** | `meta-llama/Llama-3.1-8B-Instruct` | Strong instruction-following + constrained-JSON extraction at 8B; open weights; ≤ 20B; fits one 24 GB GPU for both vLLM serving and QLoRA. |
+| Low-latency comparison | `microsoft/Phi-3.5-mini-instruct` (3.8B) | TTFT / cost floor. _Comparison run not completed._ |
 | Alt. extractor | `Qwen2.5-7B-Instruct` | Very reliable JSON-schema adherence if Llama extraction is noisy. |
 
-All ≤ 20B, open weights. GPU work runs on Modal (serverless A10G) via
-`modal_app.py` (vLLM, OpenAI-compatible) since the dev laptop has no NVIDIA
-GPU; a CPU deployment (Ollama / vLLM-CPU) provides the CPU-latency row.
+GPU work runs on a RunPod instance (`bootstrap.sh` provisions the venv, pins the full
+dependency lattice, and starts vLLM as an OpenAI-compatible server). A CPU-latency
+comparison row is outstanding.
+
+## Reports (the deliverable document)
+
+| file | contents |
+|---|---|
+| `docs/report.md` | pipeline architecture, model selection, datasets, baseline accuracy + latency, fine-tuning (baseline vs LoRA, with confidence intervals), safety-rule enforcement, limitations |
+| `outputs/accuracy_report.md` | the numbers + verdict, condensed |
+| `docs/finetuning-report.md` | fine-tuning deep dive: dataset design, QLoRA config, the two failed iterations, the distress-merge pipeline defect, serving-instability notes |
+
+**Headline result:** baseline triage accuracy 0.915 (95% CI [0.83, 0.98]); every
+base-vs-LoRA difference — extraction, distress, end-to-end — has a difference-CI that
+includes zero, i.e. **no statistically detectable effect**, the predicted outcome for
+an architecture where a deterministic engine owns the disposition.
 
 ## Documented assumptions
 

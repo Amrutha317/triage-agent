@@ -12,6 +12,25 @@ docs/~$*.xlsx
 # Dev-mode eval output (oracle/offline runs) -- only real pod results ship
 outputs/*offline*.json
 
+# Scratch eval output -- streaming row dumps, smoke runs, and the contaminated
+# v2/v3 iteration files (the serving environment had degraded; see
+# docs/finetuning-report.md S9.1). The committed outputs/*.json are the ones
+# the reports cite.
+outputs/*_rows.jsonl
+outputs/eval_smoke*.json
+outputs/eval_test*.json
+outputs/eval_baseline.json
+outputs/*_v3*.json
+outputs/extract_base_clean.json
+outputs/extract_base_test.json
+
+# Session scratch
+.ipynb_checkpoints/
+*.log
+*.backup
+watchdog.sh
+requirements.lock.bak
+
 # Model artifacts -- large binaries, never belong in git
 adapters/
 *.safetensors
