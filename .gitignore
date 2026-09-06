@@ -44,3 +44,6 @@ Thumbs.db
 # Editors
 .vscode/
 .idea/
+
+# Generated from the .md sources (docs/*.md, outputs/*.md) -- regenerate for the ZIP
+*.docx

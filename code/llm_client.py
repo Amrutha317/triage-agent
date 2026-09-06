@@ -33,6 +33,9 @@ import slots as S
 
 BASE_URL = os.environ.get("TRIAGE_BASE_URL", "http://localhost:8000/v1")
 MODEL = os.environ.get("TRIAGE_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+# "not-needed" is fine for a local vLLM / Ollama server; set TRIAGE_API_KEY to
+# point at a hosted OpenAI-compatible endpoint (Groq, Together, DeepInfra, ...).
+API_KEY = os.environ.get("TRIAGE_API_KEY", "not-needed")
 
 
 # ============================================================================
@@ -238,7 +241,7 @@ class LLMClient:
         self.llm_questions = llm_questions
         self.llm_final = llm_final
         self.max_retries = max_retries
-        self.client = OpenAI(base_url=base_url, api_key="not-needed", timeout=timeout, max_retries=0)
+        self.client = OpenAI(base_url=base_url, api_key=API_KEY, timeout=timeout, max_retries=0)
         self._extract_schema = S.json_schema_for_extractor()
 
     # -- low-level: one streamed chat call with timing + retry ---------------
