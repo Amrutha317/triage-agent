@@ -7,11 +7,14 @@
 #   3. waits until it answers, prints a test curl
 #
 # Usage (from the repo root, on the pod):
-#   bash bootstrap.sh                 # install + serve base model
-#   MODEL=meta-llama/Llama-3.1-8B-Instruct bash bootstrap.sh
+#   bash bootstrap.sh                 # install + serve the default model (Llama-3.1-8B-Instruct)
+#   MODEL=Qwen/Qwen2.5-7B-Instruct bash bootstrap.sh  # serve a different base
 #   SKIP_INSTALL=1 bash bootstrap.sh  # just (re)start the server
 #   SERVE=0 bash bootstrap.sh         # install only, don't start vLLM
 #   LORA_DIR=adapters/triage-lora bash bootstrap.sh   # serve base + LoRA adapter
+#
+# Llama-3.1-8B-Instruct is gated on Hugging Face: export HF_TOKEN before running
+# (this script logs in with it automatically) or the model download 401s.
 #
 # Versions below are frozen from a confirmed-working run (2026-09-05) --
 # do NOT `pip install -U` anything in this stack ad hoc. If you need a newer
@@ -22,7 +25,7 @@
 # =============================================================================
 set -euo pipefail
 
-MODEL="${MODEL:-Qwen/Qwen2.5-7B-Instruct}"
+MODEL="${MODEL:-meta-llama/Llama-3.1-8B-Instruct}"
 PORT="${PORT:-8000}"
 MAX_LEN="${MAX_LEN:-8192}"
 GPU_UTIL="${GPU_UTIL:-0.90}"
