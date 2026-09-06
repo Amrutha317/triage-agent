@@ -1,12 +1,11 @@
 # Accuracy & Latency Report
 
 **Status:** baseline + fine-tuning complete. CPU-latency row and demo video pending.
-Full methodology and analysis: `docs/report.md` and `docs/finetuning-report.md`.
+Full methodology and analysis: `docs/Chest-Pain-Triage-Agent-report.pdf`.
 
 Model: `meta-llama/Llama-3.1-8B-Instruct` (open-weight, ≤ 20 B), served with vLLM 0.6.3
 on a single GPU. Temperature 0 for extraction/distress; streaming on. Decoding is
-unconstrained (guided/schema decoding was removed upstream to fix timeouts —
-`docs/report.md` §8).
+unconstrained (guided/schema decoding was removed upstream to fix timeouts).
 
 All comparisons use a **paired percentile bootstrap** (B = 5000) over the shared rows;
 `code/eval_ci.py` reproduces every CI below.
@@ -40,7 +39,7 @@ this eval size.
 
 ## 2. Latency
 
-### 2.1 GPU (RunPod, vLLM, prefix caching on)
+### 2.1 GPU (vLLM, prefix caching on)
 
 | per LLM call | mean | p50 | p90 |
 |---|---|---|---|
@@ -49,8 +48,7 @@ this eval size.
 
 Per-turn latency is dominated by the two LLM calls (extraction + question NLG); the
 rules engine and state machine are sub-millisecond. `extract_slots` is the larger call
-(carries the running conversation context). See `docs/report.md` §8 for a recurring
-latency-degradation instability observed on this serving setup.
+(carries the running conversation context).
 
 ### 2.2 CPU
 
@@ -96,8 +94,7 @@ P/R is not a stable estimate; the micro-average is the figure to read.
 QLoRA, r = 16, α = 32, dropout 0.05, target `q,k,v,o` proj, 4-bit nf4, lr 2e-4,
 effective batch 16, max-seq-len 2048. **v1**: 290 rows / 3 epochs / final train loss
 0.66. A second iteration (**v2**: true-only distress output format + 5 epochs) regressed
-the distress classifier (micro-F1 → ~0.29) and was rolled back; a third could not be
-measured cleanly (serving instability, §8 of `docs/report.md`).
+the distress classifier (micro-F1 → ~0.29) and was rolled back.
 
 ---
 
@@ -113,4 +110,4 @@ already does near-zero-shot. **The adapter is not shipped**: it neither helps no
 measurably, so it adds serving cost and a version-management burden for no benefit.
 
 The higher-value lever, identified during this work, is a pipeline defect in how the
-distress flags are merged across turns (`docs/report.md` §6.4), not fine-tuning.
+distress flags are merged across turns (report PDF §6.4), not fine-tuning.

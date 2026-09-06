@@ -1,7 +1,7 @@
 # outputs/iterations/
 
 Result JSONs from a fine-tuning iteration (**v2**) that was measured, regressed,
-and rolled back — kept as evidence for the claims in `docs/report.md` §6.1.
+and rolled back — kept as evidence for the claims in the report PDF §6.
 
 The **reported** result is one level up: `../eval_lora.json`,
 `../extract_lora.json`, `../distress_lora.json` (LoRA v1).
