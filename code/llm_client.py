@@ -238,7 +238,7 @@ class LLMClient:
         self.llm_questions = llm_questions
         self.llm_final = llm_final
         self.max_retries = max_retries
-        self.client = OpenAI(base_url=base_url, api_key="not-needed", timeout=timeout)
+        self.client = OpenAI(base_url=base_url, api_key="not-needed", timeout=timeout, max_retries=0)
         self._extract_schema = S.json_schema_for_extractor()
 
     # -- low-level: one streamed chat call with timing + retry ---------------
@@ -260,8 +260,6 @@ class LLMClient:
         # `life_threatening` flag. If the server genuinely can't do guided
         # decoding we want a loud ok=False, not a quiet schema-less success.
         extra: dict = {}
-        if guided_json is not None:
-            extra["extra_body"] = {"guided_json": guided_json}
 
         for attempt in range(self.max_retries + 1):
             try:

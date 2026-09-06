@@ -239,11 +239,18 @@ def main() -> None:
         # self-contained sync HTTP round trip with no shared mutable state).
         futures = {ex.submit(run_scenario, make_client, s): i
                   for i, s in enumerate(scenarios)}
+        rows_path = args.out.replace(".json", "_rows.jsonl") if args.out else None
         for fut in cf.as_completed(futures):
             i = futures[fut]
             rows[i] = fut.result()
+            # Append each row as it completes. Without this the whole run is
+            # all-or-nothing: rows lives only in memory until the final
+            # json.dump, so killing a long run loses every finished scenario.
+            if rows_path:
+                with open(rows_path, "a", encoding="utf-8") as rfh:
+                    rfh.write(json.dumps(rows[i]) + "\n")
             done += 1
-            if done % 10 == 0 or done == len(scenarios):
+            if done % 2 == 0 or done == len(scenarios):
                 print(f"  {done}/{len(scenarios)}")
 
     agg = aggregate(rows)

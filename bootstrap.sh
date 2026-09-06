@@ -164,7 +164,8 @@ CMD=(vllm serve "$MODEL"
      --dtype auto
      --max-model-len "$MAX_LEN"
      --gpu-memory-utilization "$GPU_UTIL"
-     --enable-prefix-caching)
+     --enable-prefix-caching \
+     --guided-decoding-backend outlines)
      # EXTRACT_SYS (~1,600 tokens) and DISTRESS_SYS (~450 tokens) in
      # llm_client.py are byte-identical on every call -- without prefix
      # caching, vLLM reprocesses that whole prefix from scratch each time.
