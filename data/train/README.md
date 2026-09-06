@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | `data/eval/scenarios.jsonl` | 59 | a whole patient case: ground-truth `facts` + the disposition a correct run must reach | `eval_harness.py` (drives a full simulated conversation, scores final disposition + `rule_id`) | `{name, facts, gold_disposition, gold_rule_id}` |
 | `data/eval/extraction_golden.jsonl` | 112 | **one patient sentence** + the exact slot dict a perfect extractor should return — no conversation, no rules engine | `tests/test_extraction_golden.py` (well-formedness today); a per-field precision/recall script would run it against `extract_slots()` | `{tag, patient_text, known_slots, gold_slots}` |
-| `data/train/sft_v1.jsonl` | ~268 | **one LLM call** (an `extract_slots` *or* a `classify_distress` call) + its gold JSON output, in chat-fine-tuning form | `finetune_lora.py` → the LoRA adapter | `{messages: [system, user], response, category}` |
+| `data/train/sft_v1.jsonl` | ~290 | **one LLM call** (an `extract_slots` *or* a `classify_distress` call) + its gold JSON output, in chat-fine-tuning form | `finetune_lora.py` → the LoRA adapter | `{messages: [system, user], response, category}` |
 
 ### "What is the extraction dataset?" — `data/eval/extraction_golden.jsonl`
 
@@ -69,7 +69,8 @@ counterweight so the adapter doesn't learn "always escalate".
 
 ```bash
 export HF_TOKEN=hf_...                       # Llama-3.1-8B-Instruct is gated
-python code/generate_sft_set.py              # writes data/train/sft_v1.jsonl
+python code/generate_sft_set.py              # writes data/train/sft_v1.jsonl (~290 rows)
+python code/finetune_lora.py --epochs 5      # 5 epochs suits a set this size
 python code/finetune_lora.py                 # base model defaults to Llama-3.1-8B-Instruct
                                              # adapter -> adapters/triage-lora/
 LORA_DIR=adapters/triage-lora bash bootstrap.sh          # serve base + adapter

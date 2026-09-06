@@ -39,6 +39,15 @@ correct on all 5 offline):
      other_symptoms=[difficulty_breathing] from a vague "some of those"
                                             -> extract ANTI-HALLUCINATION below.
 
+v2 CHANGES (after measuring v1 with eval_extraction.py / eval_distress.py)
+  * distress rows emit the four OPTIONAL flags only when TRUE (was: all six
+    booleans every row -- that taught the adapter to assert
+    visible_facial_diaphoresis=false on bland turns, which the base model
+    omits). life_threatening / very_sick_or_weak / rationale still always present.
+  * new extraction rows for the value-accuracy misses v1 showed:
+    bystander_not_patient ("my dad had a heart attack at 50" != age 50),
+    stent_not_angina, central_location_not_extracted, onset_precision.
+
 Run:
     python code/generate_sft_set.py
     python code/generate_sft_set.py --out data/train/sft_v1.jsonl
@@ -105,15 +114,23 @@ def ex_row(text: str, gold: dict, category: str,
 def di_row(text: str, category: str, *, rationale: str, history: str = "",
            sdb=False, conf=False, shock=False, diap=False,
            lt=False, vsw=False) -> dict:
-    obj = {
-        "severe_difficulty_breathing": sdb,
-        "confused_or_hard_to_awaken": conf,
-        "shock_signs": shock,
-        "visible_facial_diaphoresis": diap,
-        "life_threatening": lt,
-        "very_sick_or_weak": vsw,
-        "rationale": rationale,
-    }
+    # v2: emit the four OPTIONAL flags only when true (matches how the base
+    # model behaves on calm turns, per probe_distress.py -- v1 emitted all six
+    # explicit booleans every row, which taught the adapter to assert
+    # `visible_facial_diaphoresis: false` etc. on bland follow-up turns). The
+    # two schema-required keys + rationale are always present.
+    obj: dict = {}
+    if sdb:
+        obj["severe_difficulty_breathing"] = True
+    if conf:
+        obj["confused_or_hard_to_awaken"] = True
+    if shock:
+        obj["shock_signs"] = True
+    if diap:
+        obj["visible_facial_diaphoresis"] = True
+    obj["life_threatening"] = lt
+    obj["very_sick_or_weak"] = vsw
+    obj["rationale"] = rationale
     return {
         "messages": [
             {"role": "system", "content": DISTRESS_SYS},
@@ -465,6 +482,66 @@ def extraction_rows() -> list[dict]:
                known={"radiation_sites": []}, asked=["radiation_sites"]))
     add(ex_row("It's probably nothing, I just want to be safe.", {},
                "underspecified", asked=["suspected_cause"]))
+
+    # -- v2: value-accuracy misses seen in eval_extraction.py --------------
+    # bystander age / bystander history is NOT the patient's -- "my dad had a
+    # heart attack at 50" pulled age=50 + history_of_heart_disease in v1.
+    for t in ["My dad had a heart attack at 50.",
+              "My brother had a stent put in at 45.",
+              "Heart disease runs in my family -- father and both uncles.",
+              "My mum died of a heart attack young, in her fifties."]:
+        add(ex_row(t, {"cardiac_risk_factors": ["strong_family_history"]},
+                   "bystander_not_patient", asked=["cardiac_risk_factors"]))
+
+    # a stent / bypass / prior MI is history_of_heart_disease, NOT a diagnosis
+    # of angina (v1 added known_angina_history here); and being told you do NOT
+    # have angina says nothing about heart disease.
+    for t in ["I had a stent put in two years ago.",
+              "I've had a triple bypass.",
+              "I had a heart attack back in 2019."]:
+        add(ex_row(t, {"history_of_heart_disease": True},
+                   "stent_not_angina", asked=["history_of_heart_disease",
+                                              "known_angina_history"]))
+    for t in ["I've never been told I have angina.",
+              "No, no one has ever said the word angina to me."]:
+        add(ex_row(t, {"known_angina_history": False},
+                   "stent_not_angina", asked=["history_of_heart_disease",
+                                              "known_angina_history"]))
+
+    # central chest location stated in passing is not extracted as `location`
+    # (v1 hallucinated location on "middle of my chest" phrasings)
+    for t, gold in [
+        ("It stays right in the middle of my chest and doesn't go anywhere.",
+         {"radiation_sites": []}),
+        ("It's a crushing pain right in the middle of my chest.",
+         {"pain_qualities": ["crushing"]}),
+        ("Dead centre of my chest, and it's been constant.",
+         {"pattern_comes_and_goes": False}),
+    ]:
+        add(ex_row(t, gold, "central_location_not_extracted"))
+
+    # a bare denial to the associated-symptoms question is other_symptoms=[]
+    # only (v1 also flipped chest_pain_present_now)
+    for t in ["No, nothing like that, just the chest pain.",
+              "None of those, only the chest pain itself."]:
+        add(ex_row(t, {"other_symptoms": []}, "anti_overextract",
+                   asked=["other_symptoms"]))
+
+    # onset value precision (v1 got the key but the wrong number)
+    for t, v in [("About ninety minutes ago.", 1.5),
+                 ("Two and a half hours ago.", 2.5),
+                 ("Since about eight this morning, so four or five hours.", 4.5),
+                 ("A day and a half ago.", 36),
+                 ("Roughly ten days back now.", 240),
+                 ("It came on around 45 minutes ago.", 0.75)]:
+        add(ex_row(t, {"onset_hours_ago": v}, "onset_precision",
+                   asked=["onset_hours_ago"]))
+
+    # "still there / easing" is chest_pain_present_now, not a pattern claim
+    for t in ["It's easing off but still there a bit.",
+              "Still going, though a little less intense now."]:
+        add(ex_row(t, {"chest_pain_present_now": True},
+                   "anti_overextract", asked=["chest_pain_present_now"]))
 
     return R
 
