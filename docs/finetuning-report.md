@@ -1,6 +1,7 @@
 # Fine-tuning the chest-pain triage NLU layer with QLoRA
 
-**Status:** draft — v1 results complete, v2 (5-epoch retrain) pending.
+**Status:** final. v1 is the reported adapter (v2 regressed and was rolled back;
+v3 could not be measured — §9.1).
 **Branch:** `sft-dataset-and-model-fix` · **PR:** #1
 **Base model:** `meta-llama/Llama-3.1-8B-Instruct`, served with vLLM 0.6.3 on a single GPU.
 
@@ -20,26 +21,32 @@ and **evaluated in isolation on the two NLU calls** rather than only end-to-end 
 end-to-end number runs through a separate, identified pipeline defect that masks the
 adapter's effect).
 
-**v1 result (measured, isolated):**
+**Result (paired bootstrap, B = 5000, `code/eval_ci.py`):**
 
-| layer | metric | base | LoRA v1 | Δ |
-|---|---|---|---|---|
-| extraction (112 rows) | row exact-match | 0.563 | **0.607** | +0.045 |
-| | key-F1 | 0.779 | **0.807** | +0.028 |
-| | key recall | 0.790 | **0.833** | +0.043 |
-| | slots missed | 29 | **23** | −6 |
-| | value accuracy | 0.844 | 0.826 | −0.018 |
-| distress (59 rows) | micro recall | 0.875 | **1.000** | +0.125 |
-| | scenarios missing a needed flag | 1 | **0** | −1 |
-| | micro precision | 0.636 | 0.571 | −0.065 |
-| | micro F1 | 0.737 | 0.727 | −0.010 |
+| layer | metric | base | LoRA v1 | Δ | 95% CI on Δ | beyond noise? |
+|---|---|---|---|---|---|---|
+| extraction (112) | row exact-match | 0.562 | 0.607 | +0.045 | [−0.036, +0.125] | no |
+| | key-F1 | 0.779 | 0.807 | +0.028 | [−0.030, +0.098] | no |
+| | key recall | 0.790 | 0.833 | +0.043 | [−0.022, +0.115] | no |
+| | value accuracy | 0.844 | 0.826 | −0.018 | [−0.080, +0.044] | no |
+| distress (59) | micro recall | 0.875 | 1.000 | +0.125 | [0.000, +0.417] | no |
+| | micro precision | 0.636 | 0.571 | −0.065 | [−0.208, +0.069] | no |
+| | micro F1 | 0.737 | 0.727 | −0.010 | [−0.156, +0.196] | no |
 
-The adapter **trades precision for recall** — the correct direction for triage — and
-eliminates the one genuinely-missed emergency at baseline. End-to-end accuracy is
-unchanged because of the pipeline defect in §7.
+**Every difference-CI includes zero.** No measurable effect on any metric, isolated or
+end-to-end (v1 end-to-end triage 0.915, red-flag recall 0.889 — both inside the baseline
+CI). This is the predicted outcome for a rules-engine architecture: the deterministic
+engine owns the disposition, and the LLM only extracts facts and phrases questions —
+tasks the base 8 B already does near-zero-shot. **The adapter is not shipped.**
 
-**v2 result:** _[pending — 5-epoch retrain on 290 rows with true-only distress flags +
-25 value-accuracy rows]_
+The one suggestive number is distress recall (0.875 → 1.000 — the LoRA misses no needed
+flag in this set), but the CI is [0, +0.417], five of six flags have support = 1, and §7
+shows a correctly-raised flag still does not reach a disposition.
+
+Two later iterations: **v2** (true-only distress output format + 5 epochs) regressed the
+distress classifier (isolated micro-F1 ≈ 0.29) and was rolled back; **v3** (reverted
+format, 3 epochs) could not be measured — the serving environment degraded to where the
+*base* model scored 0.57 key-F1 on a previously-0.78 eval (§9.1).
 
 Three latent bugs were fixed along the way (§8): a train/serve model mismatch, a
 training-sequence truncation, and a GPU-placement failure.
@@ -150,9 +157,9 @@ schema-valid labels.
 The set is **independent** of `extraction_golden.jsonl` (different wording), so the
 isolated eval measures generalisation, not memorisation.
 
-### 5.2 Composition (v2, 290 rows: 219 extract / 71 distress)
+### 5.2 Composition
 
-Weighted toward the five failures. Notable buckets:
+Weighted toward the five failures. The **v1** set (268 rows, the reported adapter):
 
 | bucket | rows | targets |
 |---|---|---|
@@ -160,24 +167,34 @@ Weighted toward the five failures. Notable buckets:
 | `distress_mild_dyspnea_negative` / `distress_pleuritic_negative` | 6 / 5 | failures 3, 4 (over-call) |
 | `distress_calm_negative` | 14 | anti-escalation counterweight |
 | `anti_overextract` / `underspecified` / `no_new_info` / `correction` | 10 / 8 / 3 / 2 | failure 5 + general precision |
-| `bystander_not_patient` / `stent_not_angina` / `onset_precision` / `central_location_not_extracted` | 4 / 5 / 6 / 3 | v2: v1's value-accuracy misses |
 | full slot / enum coverage (duration, pattern, radiation, nitro, PE, GERD, …) | rest | |
 
-### 5.3 v1 → v2 changes (driven by measured v1 results)
+The current file (v3) adds 25 rows for the value-accuracy misses v1 showed
+(`bystander_not_patient`, `stent_not_angina`, `onset_precision`,
+`central_location_not_extracted`) — but the adapter trained on it was never cleanly
+measured (§9.1).
 
-1. **Distress rows emit the four optional flags only when `true`** (v1 emitted all six
-   booleans every row). v1's format taught the adapter to assert
-   `visible_facial_diaphoresis: false` etc. on calm turns; the base model omits them.
-   `life_threatening` / `very_sick_or_weak` / `rationale` are still always present.
-2. **+25 extraction rows** for v1's value-accuracy regressions:
-   - `bystander_not_patient` — "my dad had a heart attack at 50" is
-     `cardiac_risk_factors=[strong_family_history]`, **not** `age=50` +
-     `history_of_heart_disease` (v1 pulled the bystander's age).
-   - `stent_not_angina` — a stent / bypass / prior MI is `history_of_heart_disease`;
-     it is **not** a diagnosis of angina (`known_angina_history`).
-   - `onset_precision` — v1 got `onset_hours_ago` as a key but the wrong number.
-   - `central_location_not_extracted` — "middle of my chest" stated in passing is not
-     extracted as `location`.
+### 5.3 The two iterations after v1 (both unsuccessful)
+
+Measured v1 with `eval_extraction.py` / `eval_distress.py`, then tried:
+
+**v2** — two changes at once (this is the experimental-hygiene mistake called out in
+§9.2):
+1. distress rows emit the four optional flags only when `true` (v1 emitted all six
+   booleans every row);
+2. 5 epochs instead of 3, plus +25 extraction rows for v1's value-accuracy misses.
+
+Result: the distress classifier collapsed (isolated micro-F1 ≈ 0.29;
+`severe_difficulty_breathing` / `confused` recall → 0 — the "true-only" format taught it
+the optional flags don't appear) and the extractor over-fit (guard-slot key-F1 that was
+1.0 at baseline dropped to 0.67; FP keys 33 → 48). Because two variables moved together
+the cause is not cleanly attributable, but both point to over-correction. Rolled back in
+the generator.
+
+**v3** — reverted the distress format to all-six, kept the +25 extraction rows, went
+back to 3 epochs. Training loss still fell to ~0.04 by the final step (the templated data
+memorises fast), and the run could not be measured — the serving environment had
+degraded past the point a base-model canary passed (§9.1).
 
 ---
 
@@ -192,8 +209,13 @@ Weighted toward the five failures. Notable buckets:
 | batch | 2 × grad-accum 8 (effective 16) |
 | max-seq-len | 2048 (extraction rows peak at ~1,800 tokens; 0/290 truncated) |
 | gradient checkpointing | on |
-| **v1** | 268 rows, 3 epochs, ~50 steps, final train loss 0.662 |
-| **v2** | 290 rows, 5 epochs, ~90 steps, final train loss _[pending]_ |
+| **v1** (reported) | SFT set @ commit `d2aa28d`, **268 rows**, 3 epochs, ~50 steps, final train loss 0.662 |
+| v2 (rolled back) | SFT set @ `af8eac2`, 290 rows, true-only distress format, 5 epochs, mean loss 0.38 |
+| v3 (not measured) | SFT set @ `3a3644c`, 290 rows, format reverted, 3 epochs, mean loss 0.59 (final-step loss ~0.04 — fit hard despite the epoch cut) |
+
+The `data/train/sft_v1.jsonl` currently in the repo is the **v3** content (§5). To
+reproduce the reported v1 adapter exactly, `git checkout d2aa28d -- code/generate_sft_set.py`
+and regenerate before training.
 
 Serving: `bootstrap.sh` starts vLLM with `--enable-lora --lora-modules
 triage-lora=adapters/triage-lora --max-lora-rank 16`; the adapter is addressable as
@@ -203,63 +225,55 @@ triage-lora=adapters/triage-lora --max-lora-rank 16`; the adapter is addressable
 
 ## 7. Results
 
+All differences are a **paired percentile bootstrap** (B = 5000) over the shared rows
+(`code/eval_ci.py`). "beyond noise?" = the 95% CI on the difference excludes zero. Base
+and v1 were both collected on a verified-healthy server (33 / 32 hallucinated keys in
+the saved rows — the healthy signature; a degraded run shows ~175, §9.1).
+
 ### 7.1 Isolated extraction — `data/eval/extraction_golden.jsonl`, 112 rows
 
-| metric | base | LoRA v1 | LoRA v2 |
-|---|---|---|---|
-| row exact-match | 0.563 | 0.607 | _[pending]_ |
-| key precision | 0.768 | 0.782 | _[pending]_ |
-| key recall | 0.790 | 0.833 | _[pending]_ |
-| key F1 | 0.779 | 0.807 | _[pending]_ |
-| value accuracy | 0.844 | 0.826 | _[pending]_ |
-| keys missed (FN) | 29 | 23 | _[pending]_ |
-| keys hallucinated (FP) | 33 | 32 | _[pending]_ |
-| rows with a hallucinated slot | 27 | 24 | _[pending]_ |
+| metric | base | LoRA v1 | Δ | 95% CI on Δ | beyond noise? |
+|---|---|---|---|---|---|
+| row exact-match | 0.562 | 0.607 | +0.045 | [−0.036, +0.125] | no |
+| key precision | 0.768 | 0.782 | +0.015 | [−0.056, +0.090] | no |
+| key recall | 0.790 | 0.833 | +0.043 | [−0.022, +0.115] | no |
+| key F1 | 0.779 | 0.807 | +0.028 | [−0.030, +0.098] | no |
+| value accuracy | 0.844 | 0.826 | −0.018 | [−0.080, +0.044] | no |
+| hallucination row-rate | 0.241 | 0.214 | −0.027 | [−0.098, +0.045] | no |
 
-v1: recovers missed slots (recall +4.3 pts, exact-match +4.5 pts) at a small value cost
-(−1.8 pts; a new "50 → age" bystander error). Hallucination count barely moved.
-v2 goal: value accuracy ≥ 0.844 while holding key-F1.
+Point estimates lean toward better *recall* (a few more slots recovered) and slightly
+worse *precision*, but nothing survives the CI at n = 112.
 
 ### 7.2 Isolated distress — derived from the 59 scenarios, 6 flags
 
-| metric | base | LoRA v1 | LoRA v2 |
-|---|---|---|---|
-| flag exact-match | 0.915 | 0.915 | _[pending]_ |
-| micro precision | 0.636 | 0.571 | _[pending]_ |
-| micro recall | 0.875 | 1.000 | _[pending]_ |
-| micro F1 | 0.737 | 0.727 | _[pending]_ |
-| scenarios missing a needed flag | 1 | 0 | _[pending]_ |
-| scenarios with a spurious flag | 4 | 5 | _[pending]_ |
+| metric | base | LoRA v1 | Δ | 95% CI on Δ | beyond noise? |
+|---|---|---|---|---|---|
+| micro precision | 0.636 | 0.571 | −0.065 | [−0.208, +0.069] | no |
+| micro recall | 0.875 | 1.000 | +0.125 | [0.000, +0.417] | no |
+| micro F1 | 0.737 | 0.727 | −0.010 | [−0.156, +0.196] | no |
+| flag exact-match | 0.915 | 0.915 | 0.000 | [−0.051, +0.051] | no |
 
-Per-flag F1, base → v1: `severe_difficulty_breathing` 1.00→1.00,
-`confused_or_hard_to_awaken` 1.00→1.00, `shock_signs` 1.00→0.67 (one new spurious fire),
-`visible_facial_diaphoresis` 1.00→1.00,
-`triager_assessment_life_threatening` 0.00→0.29 (base missed the needed one *and* fired
-4 spurious; v1 catches the needed one, fires 5 spurious),
-`triager_assessment_very_sick_weak` 1.00→1.00.
-
-**Caveat on the "spurious" flags.** The derived gold only credits the one flag each
-scenario was written to test. The extra `life_threatening` firings are on
-`ems: severe dyspnea`, `ems: shock signs`, `ems: syncope` — presentations that *are*
-life-threatening and route to `CALL_EMS_911` regardless. So the measured precision drop
-overstates the real over-triage risk; a stricter reading is "v1 raised recall to 1.0 and
-added no disposition-changing false positive."
+The recall point estimate (v1 misses no needed flag in this set) is the most suggestive
+number, but the CI touches zero and five of the six flags have support = 1 — per-flag
+P/R is not a stable estimate here. Of the "spurious" `life_threatening` firings, the
+ones on `ems: severe dyspnea` / `ems: shock signs` / `ems: syncope` are on presentations
+that route to `CALL_EMS_911` regardless, so the precision point estimate overstates real
+over-triage risk.
 
 ### 7.3 End-to-end (secondary) — `data/eval/scenarios.jsonl`, 59 scenarios
 
-| metric | baseline | LoRA v1 | LoRA v2 |
+| metric | baseline | LoRA v1 | note |
 |---|---|---|---|
-| triage accuracy | 0.915 | 0.915 | _[pending]_ |
-| workflow accuracy | 0.915 | 0.915 | _[pending]_ |
-| under-triage rate | 0.034 | 0.051 | _[pending]_ |
-| over-triage rate | 0.051 | 0.034 | _[pending]_ |
-| red-flag recall (911) | 0.944 | 0.889 | _[pending]_ |
-| red-flag recall (top-2 tier) | 0.970 | 0.939 | _[pending]_ |
-| call total (s), p50 | 3.38 | 2.31 | _[pending]_ |
+| triage accuracy | 0.915 | 0.915 | inside baseline CI [0.83, 0.98] |
+| workflow accuracy | 0.915 | 0.915 | " |
+| red-flag recall (911) | 0.944 | 0.889 | inside baseline CI [0.81, 1.00] |
+| under-triage rate | 0.034 | 0.051 | inside baseline CI [0.00, 0.09] |
+| over-triage rate | 0.051 | 0.034 | inside baseline CI [0.00, 0.12] |
+| call total (s), p50 | 3.38 | 2.31 | — |
 
-v1 is **flat on accuracy** and the mix shifts: over-triage down, under-triage and
-red-flag recall down. The isolated evals show the model *did* improve — the end-to-end
-number is gated by §7.4.
+The composition shifts slightly (over-triage down, red-flag recall down) but every
+value is inside the baseline confidence interval — **no measurable end-to-end change**.
+§7.4 explains why any real distress-recall gain would not reach a disposition anyway.
 
 ### 7.4 The pipeline defect that gates the end-to-end result
 
@@ -320,33 +334,49 @@ comparison — both sides run under identical conditions — but schema conforma
 enforced at serving time. The `_chat` docstring, which still described schema-on-every-
 retry from a since-reverted change (`41a0885`), has been corrected to match the code.
 
-**An unresolved latency degradation.** During baseline collection, individual model
-calls on an otherwise idle, correctly-configured server were observed ranging from ~3 s
-to over 300 s, with no accompanying error and no change to code or configuration. A
-clean restart of the vLLM engine cleared it, and the final baseline was collected
-immediately afterward. The cause was not identified. The earlier timeout-related work
-(`b4916df`, and an `lm-format-enforcer` → `outlines` backend switch) does not account
-for a degradation that appeared on a healthy server and resolved on restart. It is
-recorded here as a known reproducibility risk, not a fixed defect: a run whose
-`call_total_seconds` p90 is anomalous should be discarded and repeated after an engine
-restart, and any load-sensitive latency claim in this report should be read with that
-caveat.
+**A recurring serving instability, observed three times.**
+
+1. During baseline collection, individual model calls on an otherwise idle,
+   correctly-configured server ranged from ~3 s to over 300 s, with no error and no
+   config change. A clean vLLM restart cleared it; the final baseline was collected
+   immediately after.
+2. Similar spikes appeared during the v2 eval runs (`call_total_seconds` p90 elevated).
+3. After the v2/v3 training cycles, the *base* model's isolated extraction key-F1 fell
+   from **0.78 to 0.57** with a ~5× jump in hallucinated keys, on a byte-identical eval,
+   and did **not** recover on a soft restart (`pkill` + re-serve). The pod could not be
+   hard-restarted, so **v3 was never measured** and its numbers are not reported.
+
+The cause was not identified. Earlier timeout work (`b4916df`, and an
+`lm-format-enforcer` → `outlines` backend switch) does not explain a degradation that
+appears on a healthy server, worsens across train/serve cycles, and survives `pkill` —
+plausibly GPU-memory fragmentation or KV/prefix-cache state. Recorded as a
+reproducibility risk, not a fixed defect. Practice: hard-restart the instance between
+training and serving; before trusting a run, check a *base-model canary* (isolated
+extraction key-F1 should be ≈ 0.78) and discard/redo anything that has drifted. The
+reported baseline and v1 numbers were collected before (3) and verified against the
+healthy-server hallucinated-key signature (33/32, not ~175).
 
 ### 9.2 Next steps
 
 1. **Fix the distress-merge defect** (§7.4) — the single highest-value change; expected
-   to recover 2–3 failures with no fine-tuning and lift red-flag recall to 1.0.
-2. **The eval is thin** — 59 scenarios, 112 golden rows, and a *deterministic templated*
-   simulated patient (`patient_sim.py`). A LoRA that improves templated phrasings may be
-   partly fitting the template. A larger, non-templated eval (and a held-out split)
-   should precede any further fine-tuning.
-3. **Distress-classifier precision** — the real weakness. Worth a dedicated
-   precision-focused pass (more hard negatives) once (1) is done and stickiness is safe.
-4. **Re-enable schema-enforced decoding** — once a serving backend is confirmed to
-   handle the distress schema without stalling (§9.1), so serving matches the schema the
-   training data was written against.
-5. **Consider a stronger base model** — for a 91.5% system, a larger or hosted model may
-   beat fine-tuning an 8B, latency budget permitting.
+   to recover 2–3 failures with no fine-tuning and lift red-flag recall toward 1.0.
+2. **The eval is thin** — 59 scenarios, 112 golden rows, a *deterministic templated*
+   patient (`patient_sim.py`), and several distress flags at support = 1. CIs are wide.
+   `code/split_val.py` now carves a template-level `extraction_val.jsonl` for future
+   selection, but the real need is a larger, non-templated eval — de-identified real
+   transcripts with clinician-adjudicated labels — before any further fine-tuning. That
+   is also the setting where the extraction-recall lean might reach significance.
+3. **Distress-classifier precision** — the real weakness. A dedicated precision pass
+   (more hard negatives) once (1) is done and stickiness is safe.
+4. **Re-enable schema-enforced decoding** — once a serving backend handles the distress
+   schema without stalling (§9.1), so serving matches the schema the training data was
+   written against.
+5. **Experimental hygiene for the next fine-tune** — one variable per iteration (v2
+   moved format and epochs together); a held-out capability probe for catastrophic
+   forgetting; an LR/rank sweep on the val split.
+6. **Consider a stronger base model** — with extraction schema-shaped and NLG templated,
+   Phi-3.5-mini / Qwen2.5-3B may match Llama-8B at lower latency; a larger or hosted
+   model may beat fine-tuning an 8B outright.
 
 ---
 
