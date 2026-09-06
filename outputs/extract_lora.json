@@ -1,0 +1,3352 @@
+{
+  "model": "triage-lora",
+  "n_rows": 112,
+  "row_exact_match": 0.6071,
+  "key_precision": 0.7823,
+  "key_recall": 0.8333,
+  "key_f1": 0.807,
+  "value_accuracy": 0.8261,
+  "counts": {
+    "tp_keys": 115,
+    "fp_keys_hallucinated": 32,
+    "fn_keys_missed": 23,
+    "value_wrong": 20
+  },
+  "hallucination_rows": [
+    {
+      "tag": "duration_over_5",
+      "patient_text": "It's been going on for like 20 minutes now and hasn't stopped.",
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "gold": {
+        "duration": "over_5_min",
+        "chest_pain_present_now": true
+      },
+      "pred": {
+        "duration": "over_5_min",
+        "onset_hours_ago": 1.33
+      }
+    },
+    {
+      "tag": "radiation_negative",
+      "patient_text": "It stays right in the middle of my chest, doesn't go anywhere else.",
+      "fp_keys": [
+        "location"
+      ],
+      "gold": {
+        "radiation_sites": []
+      },
+      "pred": {
+        "location": "middle of my chest",
+        "radiation_sites": [
+          "none"
+        ]
+      }
+    },
+    {
+      "tag": "history_positive",
+      "patient_text": "I had a stent put in two years ago.",
+      "fp_keys": [
+        "known_angina_history"
+      ],
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "known_angina_history": false
+      }
+    },
+    {
+      "tag": "angina_negative",
+      "patient_text": "I've never been told I have angina.",
+      "fp_keys": [
+        "history_of_heart_disease"
+      ],
+      "gold": {
+        "known_angina_history": false
+      },
+      "pred": {
+        "history_of_heart_disease": false,
+        "known_angina_history": false
+      }
+    },
+    {
+      "tag": "risk_factors",
+      "patient_text": "My dad had a heart attack at 50.",
+      "fp_keys": [
+        "age",
+        "history_of_heart_disease",
+        "known_angina_history",
+        "nitroglycerin_status"
+      ],
+      "gold": {
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 50,
+        "known_angina_history": false,
+        "nitroglycerin_status": "not_prescribed"
+      }
+    },
+    {
+      "tag": "negative_control",
+      "patient_text": "No, nothing like that, just the chest pain.",
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "gold": {
+        "other_symptoms": []
+      },
+      "pred": {
+        "chest_pain_present_now": true
+      }
+    },
+    {
+      "tag": "multi_fact_dense",
+      "patient_text": "It's a crushing pain right in the middle of my chest, been going on for about 15 minutes, radiates into my left arm and jaw, and I feel really sweaty and nauseous.",
+      "fp_keys": [
+        "location",
+        "onset_hours_ago"
+      ],
+      "gold": {
+        "duration": "over_5_min",
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm",
+          "jaw"
+        ],
+        "other_symptoms": [
+          "sweating",
+          "nausea"
+        ]
+      },
+      "pred": {
+        "location": "middle of my chest",
+        "onset_hours_ago": 15.0,
+        "radiation_sites": [
+          "jaw"
+        ],
+        "pain_qualities": [
+          "crushing"
+        ]
+      }
+    },
+    {
+      "tag": "multi_fact",
+      "patient_text": "I'm having trouble breathing and my chest feels tight.",
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "gold": {
+        "other_symptoms": [
+          "difficulty_breathing"
+        ],
+        "pain_qualities": [
+          "tightness"
+        ]
+      },
+      "pred": {
+        "chest_pain_present_now": true,
+        "pain_qualities": []
+      }
+    },
+    {
+      "tag": "hedged_no_guess",
+      "patient_text": "I dunno, it just kind of hurts, hard to describe.",
+      "fp_keys": [
+        "pain_qualities"
+      ],
+      "gold": {},
+      "pred": {
+        "pain_qualities": [
+          "pressure"
+        ]
+      }
+    },
+    {
+      "tag": "pregnancy",
+      "patient_text": "There's a chance I could be pregnant, my period's late.",
+      "fp_keys": [
+        "lmp"
+      ],
+      "gold": {
+        "pregnant": true
+      },
+      "pred": {
+        "pregnant": true,
+        "lmp": "late"
+      }
+    },
+    {
+      "tag": "cardiac_symptoms_now",
+      "patient_text": "Right now I'm also feeling a bit dizzy and sweaty.",
+      "fp_keys": [
+        "chest_pain_present_now",
+        "other_symptoms"
+      ],
+      "gold": {
+        "cardiac_symptoms_present_now": true
+      },
+      "pred": {
+        "other_symptoms": [
+          "dizziness",
+          "sweating"
+        ],
+        "chest_pain_present_now": true
+      }
+    },
+    {
+      "tag": "present_now_easing",
+      "patient_text": "It's easing off but still there a bit.",
+      "fp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "gold": {
+        "chest_pain_present_now": true
+      },
+      "pred": {
+        "pattern_comes_and_goes": true
+      }
+    },
+    {
+      "tag": "risk_factors_weak_family",
+      "patient_text": "My grandfather had heart trouble but he was in his nineties.",
+      "fp_keys": [
+        "age",
+        "history_of_heart_disease"
+      ],
+      "gold": {
+        "cardiac_risk_factors": []
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 90
+      }
+    },
+    {
+      "tag": "history_bypass",
+      "patient_text": "I had a triple bypass back in 2019.",
+      "fp_keys": [
+        "cardiac_risk_factors",
+        "known_angina_history",
+        "nitroglycerin_status"
+      ],
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "known_angina_history": false,
+        "nitroglycerin_status": "not_prescribed",
+        "cardiac_risk_factors": []
+      }
+    },
+    {
+      "tag": "history_nitro_implies",
+      "patient_text": "I keep nitroglycerin spray for my heart.",
+      "fp_keys": [
+        "nitroglycerin_status"
+      ],
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "nitroglycerin_status": "prescribed_not_taken"
+      }
+    },
+    {
+      "tag": "history_negation_trap",
+      "patient_text": "My father had a heart attack when he was 58, but I've never been diagnosed with anything myself.",
+      "fp_keys": [
+        "age"
+      ],
+      "gold": {
+        "history_of_heart_disease": false,
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 58,
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      }
+    },
+    {
+      "tag": "severity_categorical_moderate",
+      "patient_text": "It woke me up out of a dead sleep and I can't get comfortable.",
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "gold": {
+        "severity_1_10": 6
+      },
+      "pred": {
+        "onset_hours_ago": 48.0
+      }
+    },
+    {
+      "tag": "severity_categorical_mild",
+      "patient_text": "It's there but I've been getting on with my day fine.",
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "gold": {
+        "severity_1_10": 2
+      },
+      "pred": {
+        "chest_pain_present_now": false
+      }
+    },
+    {
+      "tag": "other_symptoms_vomiting",
+      "patient_text": "I threw up twice this morning and I still feel sick.",
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "gold": {
+        "other_symptoms": [
+          "vomiting",
+          "nausea"
+        ]
+      },
+      "pred": {
+        "other_symptoms": [
+          "nausea",
+          "vomiting"
+        ],
+        "onset_hours_ago": 6.0
+      }
+    },
+    {
+      "tag": "duration_boundary_5",
+      "patient_text": "About five minutes, roughly.",
+      "fp_keys": [
+        "duration"
+      ],
+      "gold": {},
+      "pred": {
+        "duration": "under_5_min"
+      }
+    },
+    {
+      "tag": "pain_quality_burning_trap",
+      "patient_text": "It burns, kind of like indigestion, but I've never had indigestion before.",
+      "fp_keys": [
+        "suspected_cause"
+      ],
+      "gold": {
+        "pain_qualities": [
+          "burning"
+        ],
+        "burning_in_chest": true,
+        "heartburn_exact_match": false
+      },
+      "pred": {
+        "pain_qualities": [
+          "burning"
+        ],
+        "suspected_cause": "indigestion"
+      }
+    },
+    {
+      "tag": "multi_fact_hedged_gerd_trap",
+      "patient_text": "idk maybe 10 min? kinda crushing, goes into my arm i think \u2014 honestly probably just my heartburn again",
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "gold": {
+        "duration": "over_5_min",
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm"
+        ],
+        "suspected_cause": "heartburn"
+      },
+      "pred": {
+        "onset_hours_ago": 10.0,
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm"
+        ],
+        "suspected_cause": "heartburn"
+      }
+    },
+    {
+      "tag": "multi_fact_dense_negatives",
+      "patient_text": "I'm 68, had the pain about 40 minutes, no sweating or nausea, and it doesn't spread anywhere.",
+      "fp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "gold": {
+        "age": 68,
+        "duration": "over_5_min",
+        "onset_hours_ago": 0.67,
+        "other_symptoms": [],
+        "radiation_sites": []
+      },
+      "pred": {
+        "age": 68,
+        "onset_hours_ago": 2.0,
+        "radiation_sites": [
+          "none"
+        ],
+        "pattern_comes_and_goes": false,
+        "other_symptoms": []
+      }
+    },
+    {
+      "tag": "hedged_no_guess_severity",
+      "patient_text": "I really couldn't put a number on it, sorry.",
+      "fp_keys": [
+        "duration"
+      ],
+      "gold": {},
+      "pred": {
+        "duration": "few_seconds"
+      }
+    }
+  ],
+  "per_slot": {
+    "cardiac_symptoms_present_now": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "val_bad": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "cocaine_use_within_3_days": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "val_bad": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "known_angina_history": {
+      "tp": 1,
+      "fp": 3,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 0.25,
+      "recall": 1.0,
+      "f1": 0.4
+    },
+    "location": {
+      "tp": 1,
+      "fp": 2,
+      "fn": 0,
+      "val_bad": 1,
+      "precision": 0.333,
+      "recall": 1.0,
+      "f1": 0.5
+    },
+    "chest_pain_present_now": {
+      "tp": 4,
+      "fp": 4,
+      "fn": 2,
+      "val_bad": 0,
+      "precision": 0.5,
+      "recall": 0.667,
+      "f1": 0.571
+    },
+    "nitroglycerin_status": {
+      "tp": 2,
+      "fp": 3,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 0.4,
+      "recall": 1.0,
+      "f1": 0.571
+    },
+    "other_symptoms": {
+      "tp": 5,
+      "fp": 1,
+      "fn": 4,
+      "val_bad": 1,
+      "precision": 0.833,
+      "recall": 0.556,
+      "f1": 0.667
+    },
+    "lmp": {
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.667
+    },
+    "pattern_comes_and_goes": {
+      "tp": 4,
+      "fp": 2,
+      "fn": 1,
+      "val_bad": 0,
+      "precision": 0.667,
+      "recall": 0.8,
+      "f1": 0.727
+    },
+    "duration": {
+      "tp": 9,
+      "fp": 2,
+      "fn": 4,
+      "val_bad": 0,
+      "precision": 0.818,
+      "recall": 0.692,
+      "f1": 0.75
+    },
+    "onset_hours_ago": {
+      "tp": 10,
+      "fp": 5,
+      "fn": 1,
+      "val_bad": 4,
+      "precision": 0.667,
+      "recall": 0.909,
+      "f1": 0.769
+    },
+    "heartburn_exact_match": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 1,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8
+    },
+    "history_of_heart_disease": {
+      "tp": 8,
+      "fp": 3,
+      "fn": 1,
+      "val_bad": 1,
+      "precision": 0.727,
+      "recall": 0.889,
+      "f1": 0.8
+    },
+    "cardiac_risk_factors": {
+      "tp": 9,
+      "fp": 1,
+      "fn": 3,
+      "val_bad": 0,
+      "precision": 0.9,
+      "recall": 0.75,
+      "f1": 0.818
+    },
+    "suspected_cause": {
+      "tp": 3,
+      "fp": 1,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1": 0.857
+    },
+    "burning_in_chest": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 1,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857
+    },
+    "age": {
+      "tp": 9,
+      "fp": 3,
+      "fn": 0,
+      "val_bad": 1,
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1": 0.857
+    },
+    "pain_qualities": {
+      "tp": 8,
+      "fp": 1,
+      "fn": 1,
+      "val_bad": 3,
+      "precision": 0.889,
+      "recall": 0.889,
+      "f1": 0.889
+    },
+    "severity_1_10": {
+      "tp": 9,
+      "fp": 0,
+      "fn": 2,
+      "val_bad": 4,
+      "precision": 1.0,
+      "recall": 0.818,
+      "f1": 0.9
+    },
+    "radiation_sites": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 5,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "sour_taste_in_mouth": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pe_risk_factors": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "followed_chest_injury": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pregnant": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pain_worse_with_deep_breath": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pain_worse_with_movement": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pain_caused_by_coughing": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "rash_at_pain_site": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "temperature_f": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "heart_rate_bpm": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "passed_out": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "pattern_worsening": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "worse_with_exertion": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "val_bad": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "rows": [
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_few_seconds",
+      "patient_text": "It's just a few seconds each time, then it's completely gone.",
+      "gold": {
+        "duration": "few_seconds"
+      },
+      "pred": {
+        "duration": "few_seconds"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_few_seconds",
+      "patient_text": "Quick little jabs, maybe a second or two, and then nothing.",
+      "gold": {
+        "duration": "few_seconds"
+      },
+      "pred": {
+        "duration": "few_seconds"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_under_5",
+      "patient_text": "It lasts maybe 3 or 4 minutes each time.",
+      "gold": {
+        "duration": "under_5_min"
+      },
+      "pred": {
+        "duration": "under_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_under_5",
+      "patient_text": "Less than five minutes, usually.",
+      "gold": {
+        "duration": "under_5_min"
+      },
+      "pred": {
+        "duration": "under_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "fn_keys": [
+        "chest_pain_present_now"
+      ],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_over_5",
+      "patient_text": "It's been going on for like 20 minutes now and hasn't stopped.",
+      "gold": {
+        "duration": "over_5_min",
+        "chest_pain_present_now": true
+      },
+      "pred": {
+        "duration": "over_5_min",
+        "onset_hours_ago": 1.33
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "duration_over_5",
+      "patient_text": "More than five minutes for sure, maybe closer to ten.",
+      "gold": {
+        "duration": "over_5_min"
+      },
+      "pred": {
+        "duration": "over_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration",
+        "pattern_comes_and_goes"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration",
+        "pattern_comes_and_goes"
+      ],
+      "val_bad": [],
+      "tag": "duration_few_seconds_pattern",
+      "patient_text": "It comes and goes, each spell only lasts a second or two.",
+      "gold": {
+        "duration": "few_seconds",
+        "pattern_comes_and_goes": true
+      },
+      "pred": {
+        "duration": "few_seconds",
+        "pattern_comes_and_goes": true
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "fp_keys": [],
+      "fn_keys": [
+        "duration"
+      ],
+      "val_ok": [
+        "pattern_comes_and_goes"
+      ],
+      "val_bad": [],
+      "tag": "duration_over_5_constant",
+      "patient_text": "It's constant, hasn't let up in over half an hour.",
+      "gold": {
+        "duration": "over_5_min",
+        "pattern_comes_and_goes": false
+      },
+      "pred": {
+        "pattern_comes_and_goes": false
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "radiation_sites"
+      ],
+      "val_bad": [],
+      "tag": "radiation",
+      "patient_text": "It shoots up into my jaw when it happens.",
+      "gold": {
+        "radiation_sites": [
+          "jaw"
+        ]
+      },
+      "pred": {
+        "radiation_sites": [
+          "jaw"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "radiation_sites"
+      ],
+      "val_bad": [],
+      "tag": "radiation",
+      "patient_text": "Kind of moves down my left arm.",
+      "gold": {
+        "radiation_sites": [
+          "arm"
+        ]
+      },
+      "pred": {
+        "radiation_sites": [
+          "arm"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "radiation_sites"
+      ],
+      "val_bad": [],
+      "tag": "radiation",
+      "patient_text": "Radiates straight through to my back.",
+      "gold": {
+        "radiation_sites": [
+          "back"
+        ]
+      },
+      "pred": {
+        "radiation_sites": [
+          "back"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [
+        "location"
+      ],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "radiation_sites"
+      ],
+      "tag": "radiation_negative",
+      "patient_text": "It stays right in the middle of my chest, doesn't go anywhere else.",
+      "gold": {
+        "radiation_sites": []
+      },
+      "pred": {
+        "location": "middle of my chest",
+        "radiation_sites": [
+          "none"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "radiation_sites"
+      ],
+      "tag": "radiation_multi",
+      "patient_text": "Goes into my neck and both shoulders.",
+      "gold": {
+        "radiation_sites": [
+          "neck",
+          "shoulder"
+        ]
+      },
+      "pred": {
+        "radiation_sites": [
+          "neck",
+          "jaw",
+          "shoulder"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "onset_hours_ago"
+      ],
+      "val_bad": [],
+      "tag": "onset_minutes",
+      "patient_text": "This started about 20 minutes ago.",
+      "gold": {
+        "onset_hours_ago": 0.33
+      },
+      "pred": {
+        "onset_hours_ago": 0.33
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "onset_hours_ago"
+      ],
+      "val_bad": [],
+      "tag": "onset_days",
+      "patient_text": "It's been like this for 2 days now.",
+      "gold": {
+        "onset_hours_ago": 48
+      },
+      "pred": {
+        "onset_hours_ago": 48.0
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "onset_hours_ago"
+      ],
+      "val_bad": [],
+      "tag": "onset_minutes",
+      "patient_text": "Just started, maybe 5 minutes ago.",
+      "gold": {
+        "onset_hours_ago": 0.083
+      },
+      "pred": {
+        "onset_hours_ago": 0.083
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "onset_hours_ago"
+      ],
+      "tag": "onset_days",
+      "patient_text": "Started about 4 days ago.",
+      "gold": {
+        "onset_hours_ago": 96
+      },
+      "pred": {
+        "onset_hours_ago": 48.0
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "onset_hours_ago"
+      ],
+      "val_bad": [],
+      "tag": "onset_hours",
+      "patient_text": "Began a few hours ago, maybe 3.",
+      "gold": {
+        "onset_hours_ago": 3
+      },
+      "pred": {
+        "onset_hours_ago": 3.0
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "suspected_cause"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "suspected_cause"
+      ],
+      "val_bad": [],
+      "tag": "gerd_trap",
+      "patient_text": "It's probably just my heartburn, I get this all the time.",
+      "gold": {
+        "suspected_cause": "heartburn"
+      },
+      "pred": {
+        "suspected_cause": "heartburn"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "burning_in_chest",
+        "heartburn_exact_match"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "burning_in_chest",
+        "heartburn_exact_match"
+      ],
+      "val_bad": [],
+      "tag": "gerd_two_of_three",
+      "patient_text": "This feels exactly like the heartburn my doctor diagnosed before, and there's a burning right in my chest.",
+      "gold": {
+        "heartburn_exact_match": true,
+        "burning_in_chest": true
+      },
+      "pred": {
+        "heartburn_exact_match": true,
+        "burning_in_chest": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "burning_in_chest",
+        "heartburn_exact_match",
+        "sour_taste_in_mouth"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "burning_in_chest",
+        "heartburn_exact_match",
+        "sour_taste_in_mouth"
+      ],
+      "val_bad": [],
+      "tag": "gerd_all_three",
+      "patient_text": "Yeah it's exactly like my usual heartburn, burning, and I've got a sour taste in my mouth too.",
+      "gold": {
+        "heartburn_exact_match": true,
+        "burning_in_chest": true,
+        "sour_taste_in_mouth": true
+      },
+      "pred": {
+        "heartburn_exact_match": true,
+        "burning_in_chest": true,
+        "sour_taste_in_mouth": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "suspected_cause"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "suspected_cause"
+      ],
+      "val_bad": [],
+      "tag": "gerd_trap_no_prior_diagnosis",
+      "patient_text": "I think it's acid reflux but I've never actually been diagnosed with anything.",
+      "gold": {
+        "suspected_cause": "acid reflux"
+      },
+      "pred": {
+        "suspected_cause": "acid reflux"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "burning_in_chest",
+        "sour_taste_in_mouth"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "burning_in_chest",
+        "sour_taste_in_mouth"
+      ],
+      "val_bad": [],
+      "tag": "gerd_partial_denial",
+      "patient_text": "There's burning in my chest but no weird taste or anything in my mouth.",
+      "gold": {
+        "burning_in_chest": true,
+        "sour_taste_in_mouth": false
+      },
+      "pred": {
+        "burning_in_chest": true,
+        "sour_taste_in_mouth": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "severity_1_10"
+      ],
+      "tag": "severity_ceiling",
+      "patient_text": "Worst pain of my life, maybe an 11 if that were possible.",
+      "gold": {
+        "severity_1_10": 10
+      },
+      "pred": {
+        "severity_1_10": 11
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "severity_1_10"
+      ],
+      "val_bad": [],
+      "tag": "severity_low",
+      "patient_text": "Eh, like a 3, kind of annoying but not terrible.",
+      "gold": {
+        "severity_1_10": 3
+      },
+      "pred": {
+        "severity_1_10": 3
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pain_qualities"
+      ],
+      "val_bad": [],
+      "tag": "pain_quality",
+      "patient_text": "It's crushing, like someone's standing on my chest.",
+      "gold": {
+        "pain_qualities": [
+          "crushing"
+        ]
+      },
+      "pred": {
+        "pain_qualities": [
+          "crushing"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pain_qualities"
+      ],
+      "val_bad": [],
+      "tag": "pain_quality_multi",
+      "patient_text": "Sharp, stabbing pain.",
+      "gold": {
+        "pain_qualities": [
+          "sharp",
+          "stabbing"
+        ]
+      },
+      "pred": {
+        "pain_qualities": [
+          "sharp",
+          "stabbing"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "pain_qualities"
+      ],
+      "tag": "pain_quality",
+      "patient_text": "Just a dull ache, really.",
+      "gold": {
+        "pain_qualities": [
+          "aching"
+        ]
+      },
+      "pred": {
+        "pain_qualities": []
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors",
+      "patient_text": "I'm diabetic and I smoke.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "diabetes",
+          "smoker"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "diabetes",
+          "smoker"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "history_negative",
+      "patient_text": "No heart problems that I know of.",
+      "gold": {
+        "history_of_heart_disease": false
+      },
+      "pred": {
+        "history_of_heart_disease": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [
+        "known_angina_history"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "history_positive",
+      "patient_text": "I had a stent put in two years ago.",
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "known_angina_history": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "known_angina_history"
+      ],
+      "fp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "known_angina_history"
+      ],
+      "val_bad": [],
+      "tag": "angina_negative",
+      "patient_text": "I've never been told I have angina.",
+      "gold": {
+        "known_angina_history": false
+      },
+      "pred": {
+        "history_of_heart_disease": false,
+        "known_angina_history": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "age",
+        "history_of_heart_disease",
+        "known_angina_history",
+        "nitroglycerin_status"
+      ],
+      "fn_keys": [
+        "cardiac_risk_factors"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "risk_factors",
+      "patient_text": "My dad had a heart attack at 50.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 50,
+        "known_angina_history": false,
+        "nitroglycerin_status": "not_prescribed"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors",
+      "patient_text": "I have high blood pressure and I'm overweight.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "hypertension",
+          "obesity_bmi_30_plus"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "hypertension",
+          "obesity_bmi_30_plus"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fn_keys": [
+        "other_symptoms"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "negative_control",
+      "patient_text": "No, nothing like that, just the chest pain.",
+      "gold": {
+        "other_symptoms": []
+      },
+      "pred": {
+        "chest_pain_present_now": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pe_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pe_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "negative_control",
+      "patient_text": "Nope, none of those, no surgeries or anything.",
+      "gold": {
+        "pe_risk_factors": []
+      },
+      "pred": {
+        "pe_risk_factors": []
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pe_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pe_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "negative_control",
+      "patient_text": "I haven't traveled anywhere or had surgery recently.",
+      "gold": {
+        "pe_risk_factors": []
+      },
+      "pred": {
+        "pe_risk_factors": []
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities",
+        "radiation_sites"
+      ],
+      "fp_keys": [
+        "location",
+        "onset_hours_ago"
+      ],
+      "fn_keys": [
+        "duration",
+        "other_symptoms"
+      ],
+      "val_ok": [
+        "pain_qualities"
+      ],
+      "val_bad": [
+        "radiation_sites"
+      ],
+      "tag": "multi_fact_dense",
+      "patient_text": "It's a crushing pain right in the middle of my chest, been going on for about 15 minutes, radiates into my left arm and jaw, and I feel really sweaty and nauseous.",
+      "gold": {
+        "duration": "over_5_min",
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm",
+          "jaw"
+        ],
+        "other_symptoms": [
+          "sweating",
+          "nausea"
+        ]
+      },
+      "pred": {
+        "location": "middle of my chest",
+        "onset_hours_ago": 15.0,
+        "radiation_sites": [
+          "jaw"
+        ],
+        "pain_qualities": [
+          "crushing"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age",
+        "cardiac_risk_factors",
+        "onset_hours_ago",
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age",
+        "cardiac_risk_factors",
+        "onset_hours_ago",
+        "severity_1_10"
+      ],
+      "val_bad": [],
+      "tag": "multi_fact_dense",
+      "patient_text": "I'm 58, it started 20 minutes ago, hurts about a 7 out of 10, and I have diabetes and high blood pressure.",
+      "gold": {
+        "age": 58,
+        "onset_hours_ago": 0.33,
+        "severity_1_10": 7,
+        "cardiac_risk_factors": [
+          "diabetes",
+          "hypertension"
+        ]
+      },
+      "pred": {
+        "age": 58,
+        "onset_hours_ago": 0.33,
+        "severity_1_10": 7,
+        "cardiac_risk_factors": [
+          "diabetes",
+          "hypertension"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fn_keys": [
+        "other_symptoms"
+      ],
+      "val_ok": [],
+      "val_bad": [
+        "pain_qualities"
+      ],
+      "tag": "multi_fact",
+      "patient_text": "I'm having trouble breathing and my chest feels tight.",
+      "gold": {
+        "other_symptoms": [
+          "difficulty_breathing"
+        ],
+        "pain_qualities": [
+          "tightness"
+        ]
+      },
+      "pred": {
+        "chest_pain_present_now": true,
+        "pain_qualities": []
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "nitroglycerin_status"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "nitroglycerin_status"
+      ],
+      "val_bad": [],
+      "tag": "nitro_resolved",
+      "patient_text": "Took my nitro pill about ten minutes ago and the pain's completely gone now.",
+      "gold": {
+        "nitroglycerin_status": "taken_resolved"
+      },
+      "pred": {
+        "nitroglycerin_status": "taken_resolved"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "nitroglycerin_status"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "nitroglycerin_status"
+      ],
+      "val_bad": [],
+      "tag": "nitro_not_taken",
+      "patient_text": "I've got nitro prescribed but I haven't taken any yet for this.",
+      "gold": {
+        "nitroglycerin_status": "prescribed_not_taken"
+      },
+      "pred": {
+        "nitroglycerin_status": "prescribed_not_taken"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "pain_qualities"
+      ],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "hedged_no_guess",
+      "patient_text": "I dunno, it just kind of hurts, hard to describe.",
+      "gold": {},
+      "pred": {
+        "pain_qualities": [
+          "pressure"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pattern_comes_and_goes"
+      ],
+      "val_bad": [],
+      "tag": "hedged_weak_signal",
+      "patient_text": "Maybe... I don't know, sometimes it's there, sometimes it's not?",
+      "gold": {
+        "pattern_comes_and_goes": true
+      },
+      "pred": {
+        "pattern_comes_and_goes": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "hedged_no_guess",
+      "patient_text": "Um, I guess it's been a while? Not really sure exactly when it started.",
+      "gold": {},
+      "pred": {},
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "followed_chest_injury"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "followed_chest_injury"
+      ],
+      "val_bad": [],
+      "tag": "injury_redirect",
+      "patient_text": "This started right after I got hit in the chest playing football.",
+      "gold": {
+        "followed_chest_injury": true
+      },
+      "pred": {
+        "followed_chest_injury": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "followed_chest_injury"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "followed_chest_injury"
+      ],
+      "val_bad": [],
+      "tag": "injury_negative",
+      "patient_text": "No injury, it just came out of nowhere.",
+      "gold": {
+        "followed_chest_injury": false
+      },
+      "pred": {
+        "followed_chest_injury": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pregnant"
+      ],
+      "fp_keys": [
+        "lmp"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "pregnant"
+      ],
+      "val_bad": [],
+      "tag": "pregnancy",
+      "patient_text": "There's a chance I could be pregnant, my period's late.",
+      "gold": {
+        "pregnant": true
+      },
+      "pred": {
+        "pregnant": true,
+        "lmp": "late"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pregnant"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pregnant"
+      ],
+      "val_bad": [],
+      "tag": "pregnancy_negative",
+      "patient_text": "No way I'm pregnant.",
+      "gold": {
+        "pregnant": false
+      },
+      "pred": {
+        "pregnant": false
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pain_worse_with_deep_breath"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pain_worse_with_deep_breath"
+      ],
+      "val_bad": [],
+      "tag": "pleuritic",
+      "patient_text": "It hurts worse when I take a deep breath.",
+      "gold": {
+        "pain_worse_with_deep_breath": true
+      },
+      "pred": {
+        "pain_worse_with_deep_breath": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pain_worse_with_movement"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pain_worse_with_movement"
+      ],
+      "val_bad": [],
+      "tag": "movement_negative",
+      "patient_text": "Moving around or twisting doesn't change it at all.",
+      "gold": {
+        "pain_worse_with_movement": false
+      },
+      "pred": {
+        "pain_worse_with_movement": false
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pain_caused_by_coughing"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pain_caused_by_coughing"
+      ],
+      "val_bad": [],
+      "tag": "cough_related",
+      "patient_text": "It happens when I cough.",
+      "gold": {
+        "pain_caused_by_coughing": true
+      },
+      "pred": {
+        "pain_caused_by_coughing": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "rash_at_pain_site"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "rash_at_pain_site"
+      ],
+      "val_bad": [],
+      "tag": "rash",
+      "patient_text": "There's a rash right where it hurts, looks like little blisters.",
+      "gold": {
+        "rash_at_pain_site": true
+      },
+      "pred": {
+        "rash_at_pain_site": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "temperature_f"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "temperature_f"
+      ],
+      "val_bad": [],
+      "tag": "fever",
+      "patient_text": "My temp is like 101.5.",
+      "gold": {
+        "temperature_f": 101.5
+      },
+      "pred": {
+        "temperature_f": 101.5
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "duration"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [],
+      "tag": "correction",
+      "patient_text": "Actually wait, I think it's been longer than that, more like 10 minutes.",
+      "gold": {
+        "duration": "over_5_min"
+      },
+      "pred": {
+        "duration": "over_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "context_no_restate",
+      "patient_text": "And no, I don't have any heart disease history.",
+      "gold": {
+        "history_of_heart_disease": false
+      },
+      "pred": {
+        "history_of_heart_disease": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "chest_pain_present_now",
+        "other_symptoms"
+      ],
+      "fn_keys": [
+        "cardiac_symptoms_present_now"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "cardiac_symptoms_now",
+      "patient_text": "Right now I'm also feeling a bit dizzy and sweaty.",
+      "gold": {
+        "cardiac_symptoms_present_now": true
+      },
+      "pred": {
+        "other_symptoms": [
+          "dizziness",
+          "sweating"
+        ],
+        "chest_pain_present_now": true
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [],
+      "fn_keys": [
+        "cocaine_use_within_3_days"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "cocaine_use",
+      "patient_text": "I did use cocaine a couple days ago.",
+      "gold": {
+        "cocaine_use_within_3_days": true
+      },
+      "pred": {},
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "heart_rate_bpm"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "heart_rate_bpm"
+      ],
+      "val_bad": [],
+      "tag": "heart_rate",
+      "patient_text": "I checked my pulse, it's around 130.",
+      "gold": {
+        "heart_rate_bpm": 130
+      },
+      "pred": {
+        "heart_rate_bpm": 130.0
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "lmp"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "lmp"
+      ],
+      "val_bad": [],
+      "tag": "lmp",
+      "patient_text": "My last period was about three weeks ago.",
+      "gold": {
+        "lmp": "about three weeks ago"
+      },
+      "pred": {
+        "lmp": "about three weeks ago"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "location"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "location"
+      ],
+      "tag": "location",
+      "patient_text": "It hurts right in the center of my chest.",
+      "gold": {
+        "location": "center of chest"
+      },
+      "pred": {
+        "location": "the center of my chest"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "passed_out"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "passed_out"
+      ],
+      "val_bad": [],
+      "tag": "passed_out",
+      "patient_text": "I fainted for a few seconds earlier.",
+      "gold": {
+        "passed_out": true
+      },
+      "pred": {
+        "passed_out": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "pattern_worsening"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "pattern_worsening"
+      ],
+      "val_bad": [],
+      "tag": "pattern_worsening",
+      "patient_text": "It's been getting worse and happening more often.",
+      "gold": {
+        "pattern_worsening": true
+      },
+      "pred": {
+        "pattern_worsening": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "worse_with_exertion"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "worse_with_exertion"
+      ],
+      "val_bad": [],
+      "tag": "worse_with_exertion",
+      "patient_text": "It gets worse when I climb stairs or walk fast.",
+      "gold": {
+        "worse_with_exertion": true
+      },
+      "pred": {
+        "worse_with_exertion": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "age_plain",
+      "patient_text": "I'm 47.",
+      "gold": {
+        "age": 47
+      },
+      "pred": {
+        "age": 47
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "age_boundary_44",
+      "patient_text": "I just turned 44 last month.",
+      "gold": {
+        "age": 44
+      },
+      "pred": {
+        "age": 44
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "age_boundary_45",
+      "patient_text": "I'm 45 years old.",
+      "gold": {
+        "age": 45
+      },
+      "pred": {
+        "age": 45
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "age"
+      ],
+      "tag": "age_indirect",
+      "patient_text": "I'll be 62 in March.",
+      "gold": {
+        "age": 61
+      },
+      "pred": {
+        "age": 62
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "age_decade_hedge",
+      "patient_text": "I'm in my early thirties, 31.",
+      "gold": {
+        "age": 31
+      },
+      "pred": {
+        "age": 31
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "age_distractor",
+      "patient_text": "My husband is 70 but I'm 38.",
+      "gold": {
+        "age": 38
+      },
+      "pred": {
+        "age": 38
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "chest_pain_present_now"
+      ],
+      "val_bad": [],
+      "tag": "present_now_positive",
+      "patient_text": "Yeah, it's happening right now while we're talking.",
+      "gold": {
+        "chest_pain_present_now": true
+      },
+      "pred": {
+        "chest_pain_present_now": true
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fp_keys": [],
+      "fn_keys": [
+        "onset_hours_ago"
+      ],
+      "val_ok": [
+        "chest_pain_present_now"
+      ],
+      "val_bad": [],
+      "tag": "present_now_negative",
+      "patient_text": "It stopped about an hour ago, I feel okay now.",
+      "gold": {
+        "chest_pain_present_now": false,
+        "onset_hours_ago": 1
+      },
+      "pred": {
+        "chest_pain_present_now": false
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "chest_pain_present_now"
+      ],
+      "val_bad": [],
+      "tag": "present_now_negative_plain",
+      "patient_text": "No, it's not hurting at the moment.",
+      "gold": {
+        "chest_pain_present_now": false
+      },
+      "pred": {
+        "chest_pain_present_now": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "fn_keys": [
+        "chest_pain_present_now"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "present_now_easing",
+      "patient_text": "It's easing off but still there a bit.",
+      "gold": {
+        "chest_pain_present_now": true
+      },
+      "pred": {
+        "pattern_comes_and_goes": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "chest_pain_present_now",
+        "pattern_comes_and_goes"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "chest_pain_present_now",
+        "pattern_comes_and_goes"
+      ],
+      "val_bad": [],
+      "tag": "present_now_intermittent",
+      "patient_text": "Not this second, but it keeps coming back every few minutes.",
+      "gold": {
+        "chest_pain_present_now": false,
+        "pattern_comes_and_goes": true
+      },
+      "pred": {
+        "chest_pain_present_now": false,
+        "pattern_comes_and_goes": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors_negative",
+      "patient_text": "No diabetes, no blood pressure problems, nothing like that.",
+      "gold": {
+        "cardiac_risk_factors": []
+      },
+      "pred": {
+        "cardiac_risk_factors": []
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [],
+      "fn_keys": [
+        "cardiac_risk_factors"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "risk_factors_cholesterol",
+      "patient_text": "My cholesterol has always run high, I'm on a statin for it.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "high_cholesterol"
+        ]
+      },
+      "pred": {},
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors_quit_smoking",
+      "patient_text": "I smoked for twenty years but quit last month.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "smoker"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "smoker"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "age",
+        "history_of_heart_disease"
+      ],
+      "fn_keys": [
+        "cardiac_risk_factors"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "risk_factors_weak_family",
+      "patient_text": "My grandfather had heart trouble but he was in his nineties.",
+      "gold": {
+        "cardiac_risk_factors": []
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 90
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors_partial_denial",
+      "patient_text": "I'm diabetic but my blood pressure and cholesterol are both fine.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "diabetes"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "diabetes"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "history_negative_emphatic",
+      "patient_text": "No, never had any heart trouble in my life.",
+      "gold": {
+        "history_of_heart_disease": false
+      },
+      "pred": {
+        "history_of_heart_disease": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [
+        "cardiac_risk_factors",
+        "known_angina_history",
+        "nitroglycerin_status"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "history_bypass",
+      "patient_text": "I had a triple bypass back in 2019.",
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "known_angina_history": false,
+        "nitroglycerin_status": "not_prescribed",
+        "cardiac_risk_factors": []
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "nitroglycerin_status"
+      ],
+      "fn_keys": [
+        "history_of_heart_disease"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "history_nitro_implies",
+      "patient_text": "I keep nitroglycerin spray for my heart.",
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "nitroglycerin_status": "prescribed_not_taken"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "cardiac_risk_factors",
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [
+        "age"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [
+        "history_of_heart_disease"
+      ],
+      "tag": "history_negation_trap",
+      "patient_text": "My father had a heart attack when he was 58, but I've never been diagnosed with anything myself.",
+      "gold": {
+        "history_of_heart_disease": false,
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      },
+      "pred": {
+        "history_of_heart_disease": true,
+        "age": 58,
+        "cardiac_risk_factors": [
+          "strong_family_history"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors",
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors",
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "history_risk_not_disease",
+      "patient_text": "I've got high blood pressure but no actual heart condition.",
+      "gold": {
+        "history_of_heart_disease": false,
+        "cardiac_risk_factors": [
+          "hypertension"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "hypertension"
+        ],
+        "history_of_heart_disease": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "severity_1_10"
+      ],
+      "tag": "severity_categorical_severe",
+      "patient_text": "It's unbearable, I can't do anything at all, I'm just lying here.",
+      "gold": {
+        "severity_1_10": 9
+      },
+      "pred": {
+        "severity_1_10": 10
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "severity_1_10"
+      ],
+      "tag": "severity_categorical_severe",
+      "patient_text": "Excruciating. I've never felt anything like it.",
+      "gold": {
+        "severity_1_10": 9
+      },
+      "pred": {
+        "severity_1_10": 8
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "fn_keys": [
+        "severity_1_10"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "severity_categorical_moderate",
+      "patient_text": "It woke me up out of a dead sleep and I can't get comfortable.",
+      "gold": {
+        "severity_1_10": 6
+      },
+      "pred": {
+        "onset_hours_ago": 48.0
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "chest_pain_present_now"
+      ],
+      "fn_keys": [
+        "severity_1_10"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "severity_categorical_mild",
+      "patient_text": "It's there but I've been getting on with my day fine.",
+      "gold": {
+        "severity_1_10": 2
+      },
+      "pred": {
+        "chest_pain_present_now": false
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "severity_1_10"
+      ],
+      "tag": "severity_boundary_7",
+      "patient_text": "About a 7, maybe a 7 and a half.",
+      "gold": {
+        "severity_1_10": 7
+      },
+      "pred": {
+        "severity_1_10": 8
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "severity_1_10"
+      ],
+      "val_bad": [],
+      "tag": "severity_boundary_8",
+      "patient_text": "I'd say an 8 out of 10.",
+      "gold": {
+        "severity_1_10": 8
+      },
+      "pred": {
+        "severity_1_10": 8
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "severity_1_10"
+      ],
+      "val_bad": [],
+      "tag": "severity_range",
+      "patient_text": "Somewhere between a 4 and a 6 depending on the moment.",
+      "gold": {
+        "severity_1_10": 5
+      },
+      "pred": {
+        "severity_1_10": 5
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "other_symptoms"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "other_symptoms"
+      ],
+      "tag": "other_symptoms_classic",
+      "patient_text": "I've been really nauseous and I'm sweating through my shirt.",
+      "gold": {
+        "other_symptoms": [
+          "nausea",
+          "sweating"
+        ]
+      },
+      "pred": {
+        "other_symptoms": [
+          "dizziness",
+          "sweating"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [],
+      "fn_keys": [
+        "other_symptoms"
+      ],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "other_symptoms_dizzy",
+      "patient_text": "I keep feeling lightheaded, like I might go over.",
+      "gold": {
+        "other_symptoms": [
+          "dizziness"
+        ]
+      },
+      "pred": {},
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "other_symptoms"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "other_symptoms"
+      ],
+      "val_bad": [],
+      "tag": "other_symptoms_cough",
+      "patient_text": "I've had a cough for a few days and a bit of a fever.",
+      "gold": {
+        "other_symptoms": [
+          "cough",
+          "fever"
+        ]
+      },
+      "pred": {
+        "other_symptoms": [
+          "cough",
+          "fever"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "other_symptoms"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "other_symptoms"
+      ],
+      "val_bad": [],
+      "tag": "other_symptoms_negative_specific",
+      "patient_text": "No sweating, no nausea, no trouble breathing. Just the pain.",
+      "gold": {
+        "other_symptoms": []
+      },
+      "pred": {
+        "other_symptoms": []
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "other_symptoms"
+      ],
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "fn_keys": [],
+      "val_ok": [
+        "other_symptoms"
+      ],
+      "val_bad": [],
+      "tag": "other_symptoms_vomiting",
+      "patient_text": "I threw up twice this morning and I still feel sick.",
+      "gold": {
+        "other_symptoms": [
+          "vomiting",
+          "nausea"
+        ]
+      },
+      "pred": {
+        "other_symptoms": [
+          "nausea",
+          "vomiting"
+        ],
+        "onset_hours_ago": 6.0
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "duration"
+      ],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "duration_boundary_5",
+      "patient_text": "About five minutes, roughly.",
+      "gold": {},
+      "pred": {
+        "duration": "under_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "duration",
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "val_ok": [
+        "duration"
+      ],
+      "val_bad": [
+        "onset_hours_ago"
+      ],
+      "tag": "duration_vs_onset_trap",
+      "patient_text": "It's been happening on and off for three days, but each episode is only about two minutes.",
+      "gold": {
+        "duration": "under_5_min",
+        "onset_hours_ago": 72,
+        "pattern_comes_and_goes": true
+      },
+      "pred": {
+        "onset_hours_ago": 36.0,
+        "duration": "under_5_min"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "pain_qualities"
+      ],
+      "tag": "pain_quality_pressure",
+      "patient_text": "Like a heavy weight sitting on me, real pressure.",
+      "gold": {
+        "pain_qualities": [
+          "pressure",
+          "heavy"
+        ]
+      },
+      "pred": {
+        "pain_qualities": [
+          "pressure"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities"
+      ],
+      "fp_keys": [
+        "suspected_cause"
+      ],
+      "fn_keys": [
+        "burning_in_chest",
+        "heartburn_exact_match"
+      ],
+      "val_ok": [
+        "pain_qualities"
+      ],
+      "val_bad": [],
+      "tag": "pain_quality_burning_trap",
+      "patient_text": "It burns, kind of like indigestion, but I've never had indigestion before.",
+      "gold": {
+        "pain_qualities": [
+          "burning"
+        ],
+        "burning_in_chest": true,
+        "heartburn_exact_match": false
+      },
+      "pred": {
+        "pain_qualities": [
+          "burning"
+        ],
+        "suspected_cause": "indigestion"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "radiation_sites"
+      ],
+      "tag": "radiation_negative_explicit",
+      "patient_text": "No, it doesn't go into my arms or my jaw or anywhere.",
+      "gold": {
+        "radiation_sites": []
+      },
+      "pred": {
+        "radiation_sites": [
+          "none"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "radiation_sites"
+      ],
+      "fp_keys": [],
+      "fn_keys": [
+        "pain_qualities"
+      ],
+      "val_ok": [
+        "radiation_sites"
+      ],
+      "val_bad": [],
+      "tag": "radiation_back",
+      "patient_text": "It's tearing through to between my shoulder blades.",
+      "gold": {
+        "radiation_sites": [
+          "back"
+        ],
+        "pain_qualities": [
+          "tearing"
+        ]
+      },
+      "pred": {
+        "radiation_sites": [
+          "back"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "onset_hours_ago"
+      ],
+      "val_bad": [],
+      "tag": "onset_boundary_under_72",
+      "patient_text": "Started day before yesterday, so about two days ago.",
+      "gold": {
+        "onset_hours_ago": 48
+      },
+      "pred": {
+        "onset_hours_ago": 48.0
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "onset_hours_ago"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [
+        "onset_hours_ago"
+      ],
+      "tag": "onset_boundary_over_72",
+      "patient_text": "It's been going on since last Saturday, so five days or so.",
+      "gold": {
+        "onset_hours_ago": 120
+      },
+      "pred": {
+        "onset_hours_ago": 5.0
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "age"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "age"
+      ],
+      "val_bad": [],
+      "tag": "correction_age",
+      "patient_text": "Sorry, I said 52 before but I'm actually 62, I misspoke.",
+      "gold": {
+        "age": 62
+      },
+      "pred": {
+        "age": 62
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "history_of_heart_disease"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "history_of_heart_disease"
+      ],
+      "val_bad": [],
+      "tag": "correction_negation_flip",
+      "patient_text": "Wait, I do have heart problems actually, I forgot about the stent.",
+      "gold": {
+        "history_of_heart_disease": true
+      },
+      "pred": {
+        "history_of_heart_disease": true
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "severity_1_10"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "severity_1_10"
+      ],
+      "val_bad": [],
+      "tag": "context_no_restate_age",
+      "patient_text": "The pain is about a 6 right now.",
+      "gold": {
+        "severity_1_10": 6
+      },
+      "pred": {
+        "severity_1_10": 6
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "pain_qualities",
+        "radiation_sites",
+        "suspected_cause"
+      ],
+      "fp_keys": [
+        "onset_hours_ago"
+      ],
+      "fn_keys": [
+        "duration"
+      ],
+      "val_ok": [
+        "pain_qualities",
+        "radiation_sites",
+        "suspected_cause"
+      ],
+      "val_bad": [],
+      "tag": "multi_fact_hedged_gerd_trap",
+      "patient_text": "idk maybe 10 min? kinda crushing, goes into my arm i think \u2014 honestly probably just my heartburn again",
+      "gold": {
+        "duration": "over_5_min",
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm"
+        ],
+        "suspected_cause": "heartburn"
+      },
+      "pred": {
+        "onset_hours_ago": 10.0,
+        "pain_qualities": [
+          "crushing"
+        ],
+        "radiation_sites": [
+          "arm"
+        ],
+        "suspected_cause": "heartburn"
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [
+        "age",
+        "onset_hours_ago",
+        "other_symptoms",
+        "radiation_sites"
+      ],
+      "fp_keys": [
+        "pattern_comes_and_goes"
+      ],
+      "fn_keys": [
+        "duration"
+      ],
+      "val_ok": [
+        "age",
+        "other_symptoms"
+      ],
+      "val_bad": [
+        "onset_hours_ago",
+        "radiation_sites"
+      ],
+      "tag": "multi_fact_dense_negatives",
+      "patient_text": "I'm 68, had the pain about 40 minutes, no sweating or nausea, and it doesn't spread anywhere.",
+      "gold": {
+        "age": 68,
+        "duration": "over_5_min",
+        "onset_hours_ago": 0.67,
+        "other_symptoms": [],
+        "radiation_sites": []
+      },
+      "pred": {
+        "age": 68,
+        "onset_hours_ago": 2.0,
+        "radiation_sites": [
+          "none"
+        ],
+        "pattern_comes_and_goes": false,
+        "other_symptoms": []
+      },
+      "ok": true
+    },
+    {
+      "exact": false,
+      "tp_keys": [],
+      "fp_keys": [
+        "duration"
+      ],
+      "fn_keys": [],
+      "val_ok": [],
+      "val_bad": [],
+      "tag": "hedged_no_guess_severity",
+      "patient_text": "I really couldn't put a number on it, sorry.",
+      "gold": {},
+      "pred": {
+        "duration": "few_seconds"
+      },
+      "ok": true
+    },
+    {
+      "exact": true,
+      "tp_keys": [
+        "cardiac_risk_factors"
+      ],
+      "fp_keys": [],
+      "fn_keys": [],
+      "val_ok": [
+        "cardiac_risk_factors"
+      ],
+      "val_bad": [],
+      "tag": "risk_factors_pvd",
+      "patient_text": "I have poor circulation in my legs, peripheral vascular disease they call it.",
+      "gold": {
+        "cardiac_risk_factors": [
+          "pvd"
+        ]
+      },
+      "pred": {
+        "cardiac_risk_factors": [
+          "pvd"
+        ]
+      },
+      "ok": true
+    }
+  ]
+}

@@ -25,6 +25,36 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+# --- gradio 4.44.1 / gradio_client schema-introspection bug -----------------
+# demo.launch() walks every event handler's I/O JSON schema to build the API
+# page. On this pinned pairing it hits a boolean sub-schema
+# (`additionalProperties: true`) and dies with
+#   TypeError: argument of type 'bool' is not iterable
+# which 500s the whole app. Make the two offending helpers treat a non-dict
+# schema as "Any" instead of crashing. Cosmetic scope only (the API page).
+try:  # noqa: SIM105
+    import gradio_client.utils as _gcu
+
+    _orig_j2p = _gcu._json_schema_to_python_type
+
+    def _safe_j2p(schema, defs=None):  # type: ignore[no-untyped-def]
+        if isinstance(schema, bool):
+            return "Any"
+        return _orig_j2p(schema, defs)
+
+    _orig_get_type = _gcu.get_type
+
+    def _safe_get_type(schema):  # type: ignore[no-untyped-def]
+        if not isinstance(schema, dict):
+            return "Any"
+        return _orig_get_type(schema)
+
+    _gcu._json_schema_to_python_type = _safe_j2p
+    _gcu.get_type = _safe_get_type
+except Exception:  # noqa: BLE001
+    pass
+# --------------------------------------------------------------------------
+
 import gradio as gr  # noqa: E402
 
 from agent import TriageSession  # noqa: E402
@@ -153,7 +183,12 @@ def main() -> None:
 
     demo = build()
     demo.queue()
-    demo.launch(share=args.share, server_name="0.0.0.0", server_port=args.port)
+    # show_api=False skips the auto-generated API-schema page. That path
+    # (gradio_client._json_schema_to_python_type) crashes on this gradio 4.44.1
+    # / gradio_client pairing with "argument of type 'bool' is not iterable",
+    # which 500s the whole app. We don't expose a programmatic API anyway.
+    demo.launch(share=args.share, server_name="0.0.0.0", server_port=args.port,
+                show_api=False)
 
 
 if __name__ == "__main__":

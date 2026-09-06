@@ -7,8 +7,9 @@ Data: JSONL under data/train/, one object per line:
      "response": "<gold assistant output, e.g. the extraction JSON>"}
 
 Run (on the pod, repo root):
-    python code/finetune_lora.py
-    python code/finetune_lora.py --model meta-llama/Llama-3.1-8B-Instruct --epochs 2
+    python code/generate_sft_set.py          # writes data/train/sft_v1.jsonl
+    python code/finetune_lora.py             # trains Llama-3.1-8B-Instruct by default
+    python code/finetune_lora.py --epochs 2  # override any hyperparameter
 
 After it finishes, serve the adapter alongside the base model:
     LORA_DIR=adapters/triage-lora bash bootstrap.sh
@@ -27,14 +28,21 @@ import torch
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--model", default=os.environ.get("MODEL", "Qwen/Qwen2.5-7B-Instruct"))
+    # Default is the model actually served at runtime (llm_client.py) and by
+    # bootstrap.sh. Keep these three in sync -- a train/serve model mismatch
+    # produces an adapter that silently does nothing useful.
+    p.add_argument("--model", default=os.environ.get(
+        "MODEL", "meta-llama/Llama-3.1-8B-Instruct"))
     p.add_argument("--data", default="data/train", help="dir with *.jsonl")
     p.add_argument("--out", default="adapters/triage-lora")
     p.add_argument("--epochs", type=float, default=3.0)
     p.add_argument("--batch", type=int, default=2, help="per-device train batch size")
     p.add_argument("--grad-accum", type=int, default=8)
     p.add_argument("--lr", type=float, default=2e-4)
-    p.add_argument("--max-seq-len", type=int, default=1024)
+    # EXTRACT_SYS alone is ~1,640 tokens; add the user turn + gold JSON and a
+    # real extraction example is ~1,800-2,000. 1024 (the old default) silently
+    # truncated every extraction row's label off the end of the sequence.
+    p.add_argument("--max-seq-len", type=int, default=2048)
     p.add_argument("--r", type=int, default=16)
     p.add_argument("--alpha", type=int, default=32)
     p.add_argument("--dropout", type=float, default=0.05)
@@ -78,11 +86,18 @@ def main() -> None:
             bnb_4bit_compute_dtype=compute_dtype,
         )
 
+    # Pin the whole model to one GPU. device_map="auto" will silently spill
+    # layers to CPU/disk when VRAM is tight (e.g. a vLLM server still holding
+    # the card) -- and bitsandbytes 4-bit then aborts with an opaque
+    # "Some modules are dispatched on the CPU or the disk" error. {"": 0} makes
+    # it either fit or raise a clear CUDA OOM. Stop any `vllm serve` before
+    # training: serving and training can't share the GPU here.
+    device_map = {"": 0} if torch.cuda.is_available() else None
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
         quantization_config=quant_cfg,
         torch_dtype=compute_dtype,
-        device_map="auto",
+        device_map=device_map,
     )
     model.config.use_cache = False
     if not args.no_4bit:
@@ -112,6 +127,17 @@ def main() -> None:
     print("--- sample formatted example ---")
     print(ds[0]["text"][:800])
     print("--- end sample ---")
+
+    # Guard against the old silent-truncation bug: if a meaningful fraction of
+    # rows tokenize longer than max_seq_len, the gold response gets cut off and
+    # the model trains on nothing useful for those rows.
+    lens = [len(tokenizer(t, add_special_tokens=False)["input_ids"]) for t in ds["text"]]
+    over = sum(1 for n in lens if n > args.max_seq_len)
+    print(f"token lengths: max={max(lens)} p95={sorted(lens)[int(0.95 * (len(lens) - 1))]} "
+          f"mean={sum(lens) / len(lens):.0f}  |  over max_seq_len({args.max_seq_len}): {over}/{len(lens)}")
+    if over > 0.02 * len(lens):
+        print(f"WARNING: {over} rows exceed --max-seq-len {args.max_seq_len}; "
+              f"raise it (their labels are being truncated).")
 
     # -- trl API moved SFT args into SFTConfig around 0.11; support both -----
     from trl import SFTTrainer

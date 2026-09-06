@@ -1,0 +1,1378 @@
+{
+  "model": "triage-lora",
+  "n": 59,
+  "flag_exact_match": 0.9153,
+  "micro_precision": 0.571,
+  "micro_recall": 1.0,
+  "micro_f1": 0.727,
+  "per_flag": {
+    "severe_difficulty_breathing": {
+      "support": 3,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 56,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "confused_or_hard_to_awaken": {
+      "support": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 58,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "shock_signs": {
+      "support": 1,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "tn": 57,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.667
+    },
+    "visible_facial_diaphoresis": {
+      "support": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 58,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "triager_assessment_life_threatening": {
+      "support": 1,
+      "tp": 1,
+      "fp": 5,
+      "fn": 0,
+      "tn": 53,
+      "precision": 0.167,
+      "recall": 1.0,
+      "f1": 0.286
+    },
+    "triager_assessment_very_sick_weak": {
+      "support": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 58,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "scenarios_missing_a_needed_flag": [],
+  "scenarios_with_a_spurious_flag": [
+    "ems: severe dyspnea",
+    "ems: shock signs",
+    "ems: syncope",
+    "ordering: injury redirect does NOT outrank a real 911",
+    "red_flag_beats_benign_picture"
+  ],
+  "rows": [
+    {
+      "name": "ems: severe dyspnea",
+      "text": "I can barely breathe, I can only get a few words out at a time. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Severe breathlessness described in broken, gasping sentences.",
+      "ok": true
+    },
+    {
+      "name": "ems: altered mental status",
+      "text": "I feel really out of it, hard to think straight. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": true,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": true,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Confused and disoriented, even if transient.",
+      "ok": true
+    },
+    {
+      "name": "ems: shock signs",
+      "text": "My skin feels cold and clammy and I feel like I might collapse. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": true,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": true,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "shock signs from reported cold/clammy skin and near-collapse feelings, even if transient.",
+      "ok": true
+    },
+    {
+      "name": "ems: syncope",
+      "text": "Yes, I fainted. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": true,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "fainted, lightheaded -> shock signs",
+      "ok": true
+    },
+    {
+      "name": "ems: >5min pain + age 45 + present now",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning signs in the message; stable, described in calm terms.",
+      "ok": true
+    },
+    {
+      "name": "ems: >5min pain + age 35 + a risk factor + present now",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning signs in the message; stable, described in calm terms.",
+      "ok": true
+    },
+    {
+      "name": "ems: >5min pain + known heart disease + present now",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning signs in the message; stable, described in calm terms.",
+      "ok": true
+    },
+    {
+      "name": "ems: >5min pain + crushing quality + present now",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels crushing. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Pain described as manageable, not severe or life-threatening.",
+      "ok": true
+    },
+    {
+      "name": "ems: bradycardia",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ems: tachycardia",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ems: visible facial diaphoresis",
+      "text": "I'm drenched in sweat, it's pouring down my face. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": true,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": true,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Sweating described explicitly, even if intermittent.",
+      "ok": true
+    },
+    {
+      "name": "ems: triager judges life-threatening",
+      "text": "This feels like a real emergency, please help. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Expresses a genuine emergency, even if the symptoms themselves don't sound severe.",
+      "ok": true
+    },
+    {
+      "name": "A1: >5min pain resolved, age 60, recent -> ED/UCC not 911",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 10 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning signs in the message; stable, not severe.",
+      "ok": true
+    },
+    {
+      "name": "redirect: followed a chest injury",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ordering: injury redirect does NOT outrank a real 911",
+      "text": "I can barely breathe, I can only get a few words out at a time. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Severe breathlessness described in broken, gasping sentences.",
+      "ok": true
+    },
+    {
+      "name": "ed: severe pain 9/10",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 9 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Pain described as 9/10, sharp, and severe, but stable and not life-threatening on its face.",
+      "ok": true
+    },
+    {
+      "name": "ed: worsening comes-and-goes angina (not fleeting)",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "exception: worsening angina that lasts only seconds -> NOT ED_worsening",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: radiation to arm",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It spreads into my arm. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "exception: radiation but clearly worse with movement -> NOT ED_radiation",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It spreads into my arm. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: difficulty breathing (non-severe)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: hemoptysis",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: cocaine use in last 3 days",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (recent surgery)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (inherited clotting disorder)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (hip/leg fracture or cast)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (prolonged bedrest)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (long-distance travel)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (prior DVT/PE)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ed: PE risk factor (active/recent cancer) -- distinct CA list",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "educ: pleuritic pain (worse on deep breath)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "educ: >5min pain within 72h, low risk, resolved",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 40 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "educ: triager judges very sick/weak",
+      "text": "I feel extremely sick and weak all over. Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": true
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": true
+      },
+      "rationale": "Reports being 'extremely sick and weak all over', with a clear sense of deterioration.",
+      "ok": true
+    },
+    {
+      "name": "pcp24: >5min pain >3 days ago, nothing now",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 days ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "pcp24: brief (<5min) pain fully resolved",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "pcp24: fever over 100.4",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "pcp24: rash at pain site",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "gerd: all three conditions present",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "gerd NOT concluded on only two of three (no sour taste)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "gerd NOT concluded when only 'burning' quality reported",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels burning. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Stable, described pain not severe.",
+      "ok": true
+    },
+    {
+      "name": "pcp3: <5min pain, nitro prescribed but not taken",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "shadow: <5min pain fully resolved after nitro -> 24h rule wins (protocol order)",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "pcp3: nitro-resolved rule only reachable while a cardiac symptom persists",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "pcp3: known angina, comes and goes, not worsening",
+      "text": "It lasts less than 5 minutes. I'd rate the pain 2 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No concerning symptoms described, stable presentation.",
+      "ok": true
+    },
+    {
+      "name": "pcp3: fleeting cough pains persisting >3 days",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 4 days ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "pcp3: fleeting pains persisting >3 days (no cough)",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 4 days ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "home: fleeting cough pains, recent",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 6 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Stable, transient chest pain described in detail with no concerning signs.",
+      "ok": true
+    },
+    {
+      "name": "home: fleeting pains, recent",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It feels sharp. It started about 6 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "ordering: EMS outranks ED when both would match",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 9 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Painful but stable description with no signs of distress or emergency.",
+      "ok": true
+    },
+    {
+      "name": "ordering: ED_NOW outranks ED/UCC when both match",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 9 out of 10. It feels sharp. It started about 5 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Pain described as 9/10, sharp, and severe, but stable and not life-threatening on its face.",
+      "ok": true
+    },
+    {
+      "name": "A1_high_risk_pain_resolved_30min_ago",
+      "text": "It's lasted more than 5 minutes. I'd rate the pain 6 out of 10. It feels crushing. It started about 30 minutes ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Pain described, stable, no other concerning signs.",
+      "ok": true
+    },
+    {
+      "name": "A1_high_risk_pain_present_now",
+      "text": "It's lasted more than 5 minutes. It feels crushing. It started about 30 minutes ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Describes chest pain onset and duration, but no apparent breathlessness, shock, or other concerning signs.",
+      "ok": true
+    },
+    {
+      "name": "A1_old_resolved_episode_stays_pcp24",
+      "text": "It's lasted more than 5 minutes. It started about 5 days ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No acute distress described, just a history.",
+      "ok": true
+    },
+    {
+      "name": "pe_cancer_care_advice",
+      "text": "It lasts less than 5 minutes.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No new concerning information.",
+      "ok": true
+    },
+    {
+      "name": "gerd_only_with_all_three",
+      "text": "It's lasted more than 5 minutes. It started about 3 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No new concerning symptoms described, just duration and onset time.",
+      "ok": true
+    },
+    {
+      "name": "fleeting_cough_pain_new",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It started about 12 hours ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "fleeting_pain_persistent_4_days",
+      "text": "Each time it only lasts a few seconds. I'd rate the pain 2 out of 10. It started about 4 days ago.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "No signs of distress or emergency present in the message.",
+      "ok": true
+    },
+    {
+      "name": "red_flag_beats_benign_picture",
+      "text": "I can barely breathe, I can only get a few words out at a time. Each time it only lasts a few seconds.",
+      "gold": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": true,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": true,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Severe breathlessness, gasping, broken sentences -- emergency signal clear.",
+      "ok": true
+    },
+    {
+      "name": "injury_is_out_of_scope",
+      "text": "It's lasted more than 5 minutes.",
+      "gold": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "pred": {
+        "severe_difficulty_breathing": false,
+        "confused_or_hard_to_awaken": false,
+        "shock_signs": false,
+        "visible_facial_diaphoresis": false,
+        "triager_assessment_life_threatening": false,
+        "triager_assessment_very_sick_weak": false
+      },
+      "rationale": "Duration alone, no other concerning symptoms.",
+      "ok": true
+    }
+  ]
+}

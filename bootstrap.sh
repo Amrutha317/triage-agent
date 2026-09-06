@@ -7,11 +7,14 @@
 #   3. waits until it answers, prints a test curl
 #
 # Usage (from the repo root, on the pod):
-#   bash bootstrap.sh                 # install + serve base model
-#   MODEL=meta-llama/Llama-3.1-8B-Instruct bash bootstrap.sh
+#   bash bootstrap.sh                 # install + serve the default model (Llama-3.1-8B-Instruct)
+#   MODEL=Qwen/Qwen2.5-7B-Instruct bash bootstrap.sh  # serve a different base
 #   SKIP_INSTALL=1 bash bootstrap.sh  # just (re)start the server
 #   SERVE=0 bash bootstrap.sh         # install only, don't start vLLM
 #   LORA_DIR=adapters/triage-lora bash bootstrap.sh   # serve base + LoRA adapter
+#
+# Llama-3.1-8B-Instruct is gated on Hugging Face: export HF_TOKEN before running
+# (this script logs in with it automatically) or the model download 401s.
 #
 # Versions below are frozen from a confirmed-working run (2026-09-05) --
 # do NOT `pip install -U` anything in this stack ad hoc. If you need a newer
@@ -22,7 +25,7 @@
 # =============================================================================
 set -euo pipefail
 
-MODEL="${MODEL:-Qwen/Qwen2.5-7B-Instruct}"
+MODEL="${MODEL:-meta-llama/Llama-3.1-8B-Instruct}"
 PORT="${PORT:-8000}"
 MAX_LEN="${MAX_LEN:-8192}"
 GPU_UTIL="${GPU_UTIL:-0.90}"
@@ -30,6 +33,10 @@ SERVE="${SERVE:-1}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 LORA_DIR="${LORA_DIR:-}"
 LOG="${LOG:-vllm.log}"
+# PREFIX_CACHING=0 disables --enable-prefix-caching. Set it if the server starts
+# returning degraded output on a byte-identical prompt (suspected stale prefix
+# KV) -- it trades ~latency for a clean recompute of the system prefix each call.
+PREFIX_CACHING="${PREFIX_CACHING:-1}"
 
 echo "=============================================================="
 echo " model      : $MODEL"
@@ -164,13 +171,17 @@ CMD=(vllm serve "$MODEL"
      --dtype auto
      --max-model-len "$MAX_LEN"
      --gpu-memory-utilization "$GPU_UTIL"
-     --enable-prefix-caching \
      --guided-decoding-backend outlines)
      # EXTRACT_SYS (~1,600 tokens) and DISTRESS_SYS (~450 tokens) in
-     # llm_client.py are byte-identical on every call -- without prefix
-     # caching, vLLM reprocesses that whole prefix from scratch each time.
-     # This is the single biggest latency lever available and costs nothing
-     # to enable; do this before any other tuning.
+     # llm_client.py are byte-identical on every call -- with prefix caching
+     # (default on), vLLM reuses that prefix's KV instead of reprocessing it.
+     # Biggest latency lever available. Disable with PREFIX_CACHING=0 only if
+     # you suspect the cache has gone stale (degraded output on an unchanged
+     # prompt).
+
+if [ "$PREFIX_CACHING" = "1" ]; then
+  CMD+=(--enable-prefix-caching)
+fi
 
 if [ -n "$LORA_DIR" ]; then
   CMD+=(--enable-lora --lora-modules "triage-lora=$LORA_DIR" --max-lora-rank 16)
