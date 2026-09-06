@@ -86,3 +86,31 @@ Defaults worth knowing (all overridable): `--epochs 3`, `--batch 2`,
 `bootstrap.sh --max-lora-rank 16`), `--max-seq-len 2048` (an extraction row is
 ~1.8–2.0k tokens — the old 1024 default silently truncated the label off every
 one).
+
+## Measuring the fine-tune
+
+Judge the adapter on the layer it actually changes — the two NLU calls — not
+only end-to-end. End-to-end scenario accuracy runs through the rest of the
+pipeline (including a known distress-flag merge bug where a later calm turn
+overwrites a turn-1 escalation), which masks what the adapter did. The isolated
+evals below don't have that confound.
+
+```bash
+# extractor, in isolation, against the 112-row golden set
+python code/eval_extraction.py --model meta-llama/Llama-3.1-8B-Instruct --out outputs/extract_base.json
+python code/eval_extraction.py --model triage-lora                     --out outputs/extract_lora.json
+python code/eval_extraction.py --compare outputs/extract_base.json outputs/extract_lora.json
+
+# distress classifier, in isolation (labels derived from the 59 scenarios' facts)
+python code/eval_distress.py --model meta-llama/Llama-3.1-8B-Instruct --out outputs/distress_base.json
+python code/eval_distress.py --model triage-lora                     --out outputs/distress_lora.json
+python code/eval_distress.py --compare outputs/distress_base.json outputs/distress_lora.json
+
+# end-to-end stays a SECONDARY number (report with the pipeline-bug caveat)
+TRIAGE_MODEL=triage-lora python code/eval_harness.py --out outputs/eval_lora.json --label triage-lora
+```
+
+`eval_extraction.py` reports row exact-match, key-level P/R/F1 (an FP key =
+hallucinated slot — the failure mode behind the `pcp3` scenario), value
+accuracy, and a per-slot table. `eval_distress.py` reports per-flag P/R/F1 plus
+which scenarios missed a needed flag or raised a spurious one.
