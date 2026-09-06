@@ -307,15 +307,45 @@ one as authoritative.
 
 ## 9. Limitations & next steps
 
-1. **Fix the distress-merge defect** (§7.4) — the single highest-value change; likely
-   recovers 2–3 failures with no fine-tuning and lifts red-flag recall to 1.0.
+### 9.1 Evaluation conditions and an unresolved instability
+
+**Decoding was unconstrained for every result in this report.** Guided
+(schema-enforced) decoding was removed from `llm_client._chat` in commit `b4916df`,
+ahead of this work, to resolve request timeouts and mid-stream connection drops on the
+distress-classification schema. The `guided_json` argument is still threaded from the
+call sites but is not applied, so vLLM's `--guided-decoding-backend` flag is inert, and
+baseline, v1, v2, and the isolated evals all ran with free-form generation plus regex
+JSON extraction (`_parse_json`). This is a sound basis for the base-vs-adapter
+comparison — both sides run under identical conditions — but schema conformance is not
+enforced at serving time. The `_chat` docstring, which still described schema-on-every-
+retry from a since-reverted change (`41a0885`), has been corrected to match the code.
+
+**An unresolved latency degradation.** During baseline collection, individual model
+calls on an otherwise idle, correctly-configured server were observed ranging from ~3 s
+to over 300 s, with no accompanying error and no change to code or configuration. A
+clean restart of the vLLM engine cleared it, and the final baseline was collected
+immediately afterward. The cause was not identified. The earlier timeout-related work
+(`b4916df`, and an `lm-format-enforcer` → `outlines` backend switch) does not account
+for a degradation that appeared on a healthy server and resolved on restart. It is
+recorded here as a known reproducibility risk, not a fixed defect: a run whose
+`call_total_seconds` p90 is anomalous should be discarded and repeated after an engine
+restart, and any load-sensitive latency claim in this report should be read with that
+caveat.
+
+### 9.2 Next steps
+
+1. **Fix the distress-merge defect** (§7.4) — the single highest-value change; expected
+   to recover 2–3 failures with no fine-tuning and lift red-flag recall to 1.0.
 2. **The eval is thin** — 59 scenarios, 112 golden rows, and a *deterministic templated*
    simulated patient (`patient_sim.py`). A LoRA that improves templated phrasings may be
    partly fitting the template. A larger, non-templated eval (and a held-out split)
    should precede any further fine-tuning.
 3. **Distress-classifier precision** — the real weakness. Worth a dedicated
    precision-focused pass (more hard negatives) once (1) is done and stickiness is safe.
-4. **Consider a stronger base model** — for a 91.5% system, a larger or hosted model may
+4. **Re-enable schema-enforced decoding** — once a serving backend is confirmed to
+   handle the distress schema without stalling (§9.1), so serving matches the schema the
+   training data was written against.
+5. **Consider a stronger base model** — for a 91.5% system, a larger or hosted model may
    beat fine-tuning an 8B, latency budget permitting.
 
 ---

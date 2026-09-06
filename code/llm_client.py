@@ -251,14 +251,16 @@ class LLMClient:
         guided_json: dict | None = None,
     ) -> LLMResult:
         last_err = ""
-        # The JSON schema stays attached on EVERY attempt. The old code
-        # dropped it on retries (falling back to response_format=json_object,
-        # which guarantees valid JSON but NOT schema conformance) -- silently,
-        # with nothing recorded. That made a "succeeded on retry, unconstrained"
-        # call indistinguishable from a clean one, and is a plausible
-        # mechanical cause of a missed `severe_difficulty_breathing` /
-        # `life_threatening` flag. If the server genuinely can't do guided
-        # decoding we want a loud ok=False, not a quiet schema-less success.
+        # NOTE: guided (schema-enforced) decoding is currently NOT sent. It was
+        # removed in b4916df to resolve request timeouts / mid-stream drops on
+        # the distress schema. `guided_json` is still accepted and threaded from
+        # the call sites, but not applied here, so requests use free-form
+        # generation + _parse_json() cleanup. vLLM's --guided-decoding-backend
+        # flag in bootstrap.sh is therefore inert. To re-enable, add
+        #   if guided_json is not None:
+        #       extra["extra_body"] = {"guided_json": guided_json}
+        # below AND confirm the serving backend handles DISTRESS_SYS's schema
+        # (7 props, mixed types, a required array) without stalling.
         extra: dict = {}
 
         for attempt in range(self.max_retries + 1):
