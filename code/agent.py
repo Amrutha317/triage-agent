@@ -39,15 +39,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from decision_engine import Decision, RulesEngine  # noqa: E402
 from guardrails import guard_final, guard_question  # noqa: E402
-from slots import ALL_SLOTS  # noqa: E402
 from state_machine import TriageStateMachine  # noqa: E402
-
-# Observed red-flag / triager-judgment slots. These are set from HOW the patient
-# presents, not from a fact they can retract -- so they are monotonic across
-# turns: once any turn's distress read raises one, a later calmer turn must not
-# clear it. (keyword_redflags already guarantees this within a turn; this
-# extends it across turns.)
-_STICKY_OBSERVED = frozenset(s.id for s in ALL_SLOTS if s.observed_only)
 
 GREETING = (
     "Hi, I'm a chest-pain triage assistant. I can't diagnose you, but I'll "
@@ -121,16 +113,6 @@ class TriageSession:
         merged: dict[str, Any] = {}
         merged.update(distress.data or {})
         merged.update(extract.data or {})    # facts win over inferred distress on overlap
-
-        # Never let a calmer later turn clear an observed red flag an earlier
-        # turn already raised (see _STICKY_OBSERVED). Without this, the distress
-        # classifier -- which re-runs every turn and always emits
-        # life_threatening / very_sick_or_weak as booleans -- silently
-        # downgrades a turn-1 escalation to False on turn 3.
-        for k in _STICKY_OBSERVED:
-            if merged.get(k) is False and self.fsm.slots.get(k) is True:
-                del merged[k]
-
         turn = self.fsm.ingest(merged)
         self._pending_asked = list(turn.slots) if turn.kind == "ask" else []
 
