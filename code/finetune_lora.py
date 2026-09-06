@@ -23,7 +23,9 @@ import glob
 import os
 import sys
 
-import torch
+# torch / transformers / peft / trl are imported inside main() so `--help`
+# works without the GPU training stack (installed by bootstrap.sh, not
+# requirements.txt).
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,6 +55,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
+    import torch
     from datasets import load_dataset
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
     from transformers import (
