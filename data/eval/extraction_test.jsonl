@@ -1,0 +1,87 @@
+{"tag": "duration_few_seconds", "patient_text": "It's just a few seconds each time, then it's completely gone.", "known_slots": {}, "gold_slots": {"duration": "few_seconds"}}
+{"tag": "duration_few_seconds", "patient_text": "Quick little jabs, maybe a second or two, and then nothing.", "known_slots": {}, "gold_slots": {"duration": "few_seconds"}}
+{"tag": "duration_over_5", "patient_text": "It's been going on for like 20 minutes now and hasn't stopped.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "chest_pain_present_now": true}}
+{"tag": "duration_over_5", "patient_text": "More than five minutes for sure, maybe closer to ten.", "known_slots": {}, "gold_slots": {"duration": "over_5_min"}}
+{"tag": "duration_few_seconds_pattern", "patient_text": "It comes and goes, each spell only lasts a second or two.", "known_slots": {}, "gold_slots": {"duration": "few_seconds", "pattern_comes_and_goes": true}}
+{"tag": "duration_over_5_constant", "patient_text": "It's constant, hasn't let up in over half an hour.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "pattern_comes_and_goes": false}}
+{"tag": "radiation_negative", "patient_text": "It stays right in the middle of my chest, doesn't go anywhere else.", "known_slots": {}, "gold_slots": {"radiation_sites": []}}
+{"tag": "radiation_multi", "patient_text": "Goes into my neck and both shoulders.", "known_slots": {}, "gold_slots": {"radiation_sites": ["neck", "shoulder"]}}
+{"tag": "onset_days", "patient_text": "It's been like this for 2 days now.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 48}}
+{"tag": "onset_days", "patient_text": "Started about 4 days ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 96}}
+{"tag": "onset_hours", "patient_text": "Began a few hours ago, maybe 3.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 3}}
+{"tag": "gerd_two_of_three", "patient_text": "This feels exactly like the heartburn my doctor diagnosed before, and there's a burning right in my chest.", "known_slots": {}, "gold_slots": {"heartburn_exact_match": true, "burning_in_chest": true}}
+{"tag": "gerd_all_three", "patient_text": "Yeah it's exactly like my usual heartburn, burning, and I've got a sour taste in my mouth too.", "known_slots": {}, "gold_slots": {"heartburn_exact_match": true, "burning_in_chest": true, "sour_taste_in_mouth": true}}
+{"tag": "gerd_trap_no_prior_diagnosis", "patient_text": "I think it's acid reflux but I've never actually been diagnosed with anything.", "known_slots": {}, "gold_slots": {"suspected_cause": "acid reflux"}}
+{"tag": "gerd_partial_denial", "patient_text": "There's burning in my chest but no weird taste or anything in my mouth.", "known_slots": {}, "gold_slots": {"burning_in_chest": true, "sour_taste_in_mouth": false}}
+{"tag": "severity_ceiling", "patient_text": "Worst pain of my life, maybe an 11 if that were possible.", "known_slots": {}, "gold_slots": {"severity_1_10": 10}}
+{"tag": "severity_low", "patient_text": "Eh, like a 3, kind of annoying but not terrible.", "known_slots": {}, "gold_slots": {"severity_1_10": 3}}
+{"tag": "pain_quality", "patient_text": "It's crushing, like someone's standing on my chest.", "known_slots": {}, "gold_slots": {"pain_qualities": ["crushing"]}}
+{"tag": "pain_quality_multi", "patient_text": "Sharp, stabbing pain.", "known_slots": {}, "gold_slots": {"pain_qualities": ["sharp", "stabbing"]}}
+{"tag": "pain_quality", "patient_text": "Just a dull ache, really.", "known_slots": {}, "gold_slots": {"pain_qualities": ["aching"]}}
+{"tag": "risk_factors", "patient_text": "I'm diabetic and I smoke.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["diabetes", "smoker"]}}
+{"tag": "history_negative", "patient_text": "No heart problems that I know of.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false}}
+{"tag": "history_positive", "patient_text": "I had a stent put in two years ago.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
+{"tag": "angina_negative", "patient_text": "I've never been told I have angina.", "known_slots": {}, "gold_slots": {"known_angina_history": false}}
+{"tag": "risk_factors", "patient_text": "My dad had a heart attack at 50.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["strong_family_history"]}}
+{"tag": "risk_factors", "patient_text": "I have high blood pressure and I'm overweight.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["hypertension", "obesity_bmi_30_plus"]}}
+{"tag": "negative_control", "patient_text": "No, nothing like that, just the chest pain.", "known_slots": {}, "gold_slots": {"other_symptoms": []}}
+{"tag": "negative_control", "patient_text": "Nope, none of those, no surgeries or anything.", "known_slots": {}, "gold_slots": {"pe_risk_factors": []}}
+{"tag": "negative_control", "patient_text": "I haven't traveled anywhere or had surgery recently.", "known_slots": {}, "gold_slots": {"pe_risk_factors": []}}
+{"tag": "multi_fact", "patient_text": "I'm having trouble breathing and my chest feels tight.", "known_slots": {}, "gold_slots": {"other_symptoms": ["difficulty_breathing"], "pain_qualities": ["tightness"]}}
+{"tag": "nitro_not_taken", "patient_text": "I've got nitro prescribed but I haven't taken any yet for this.", "known_slots": {}, "gold_slots": {"nitroglycerin_status": "prescribed_not_taken"}}
+{"tag": "hedged_no_guess", "patient_text": "I dunno, it just kind of hurts, hard to describe.", "known_slots": {}, "gold_slots": {}}
+{"tag": "hedged_weak_signal", "patient_text": "Maybe... I don't know, sometimes it's there, sometimes it's not?", "known_slots": {}, "gold_slots": {"pattern_comes_and_goes": true}}
+{"tag": "hedged_no_guess", "patient_text": "Um, I guess it's been a while? Not really sure exactly when it started.", "known_slots": {}, "gold_slots": {}}
+{"tag": "injury_negative", "patient_text": "No injury, it just came out of nowhere.", "known_slots": {}, "gold_slots": {"followed_chest_injury": false}}
+{"tag": "pregnancy", "patient_text": "There's a chance I could be pregnant, my period's late.", "known_slots": {}, "gold_slots": {"pregnant": true}}
+{"tag": "pregnancy_negative", "patient_text": "No way I'm pregnant.", "known_slots": {}, "gold_slots": {"pregnant": false}}
+{"tag": "pleuritic", "patient_text": "It hurts worse when I take a deep breath.", "known_slots": {}, "gold_slots": {"pain_worse_with_deep_breath": true}}
+{"tag": "movement_negative", "patient_text": "Moving around or twisting doesn't change it at all.", "known_slots": {}, "gold_slots": {"pain_worse_with_movement": false}}
+{"tag": "cough_related", "patient_text": "It happens when I cough.", "known_slots": {}, "gold_slots": {"pain_caused_by_coughing": true}}
+{"tag": "fever", "patient_text": "My temp is like 101.5.", "known_slots": {}, "gold_slots": {"temperature_f": 101.5}}
+{"tag": "correction", "patient_text": "Actually wait, I think it's been longer than that, more like 10 minutes.", "known_slots": {"duration": "under_5_min"}, "gold_slots": {"duration": "over_5_min"}}
+{"tag": "context_no_restate", "patient_text": "And no, I don't have any heart disease history.", "known_slots": {"age": 40}, "gold_slots": {"history_of_heart_disease": false}}
+{"tag": "cardiac_symptoms_now", "patient_text": "Right now I'm also feeling a bit dizzy and sweaty.", "known_slots": {}, "gold_slots": {"cardiac_symptoms_present_now": true}}
+{"tag": "cocaine_use", "patient_text": "I did use cocaine a couple days ago.", "known_slots": {}, "gold_slots": {"cocaine_use_within_3_days": true}}
+{"tag": "heart_rate", "patient_text": "I checked my pulse, it's around 130.", "known_slots": {}, "gold_slots": {"heart_rate_bpm": 130}}
+{"tag": "lmp", "patient_text": "My last period was about three weeks ago.", "known_slots": {}, "gold_slots": {"lmp": "about three weeks ago"}}
+{"tag": "location", "patient_text": "It hurts right in the center of my chest.", "known_slots": {}, "gold_slots": {"location": "center of chest"}}
+{"tag": "pattern_worsening", "patient_text": "It's been getting worse and happening more often.", "known_slots": {}, "gold_slots": {"pattern_worsening": true}}
+{"tag": "worse_with_exertion", "patient_text": "It gets worse when I climb stairs or walk fast.", "known_slots": {}, "gold_slots": {"worse_with_exertion": true}}
+{"tag": "age_boundary_45", "patient_text": "I'm 45 years old.", "known_slots": {}, "gold_slots": {"age": 45}}
+{"tag": "age_indirect", "patient_text": "I'll be 62 in March.", "known_slots": {}, "gold_slots": {"age": 61}}
+{"tag": "age_decade_hedge", "patient_text": "I'm in my early thirties, 31.", "known_slots": {}, "gold_slots": {"age": 31}}
+{"tag": "age_distractor", "patient_text": "My husband is 70 but I'm 38.", "known_slots": {}, "gold_slots": {"age": 38}}
+{"tag": "present_now_positive", "patient_text": "Yeah, it's happening right now while we're talking.", "known_slots": {}, "gold_slots": {"chest_pain_present_now": true}}
+{"tag": "present_now_negative", "patient_text": "It stopped about an hour ago, I feel okay now.", "known_slots": {}, "gold_slots": {"chest_pain_present_now": false, "onset_hours_ago": 1}}
+{"tag": "present_now_negative_plain", "patient_text": "No, it's not hurting at the moment.", "known_slots": {}, "gold_slots": {"chest_pain_present_now": false}}
+{"tag": "present_now_intermittent", "patient_text": "Not this second, but it keeps coming back every few minutes.", "known_slots": {}, "gold_slots": {"chest_pain_present_now": false, "pattern_comes_and_goes": true}}
+{"tag": "risk_factors_negative", "patient_text": "No diabetes, no blood pressure problems, nothing like that.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": []}}
+{"tag": "risk_factors_cholesterol", "patient_text": "My cholesterol has always run high, I'm on a statin for it.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["high_cholesterol"]}}
+{"tag": "risk_factors_quit_smoking", "patient_text": "I smoked for twenty years but quit last month.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["smoker"]}}
+{"tag": "risk_factors_weak_family", "patient_text": "My grandfather had heart trouble but he was in his nineties.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": []}}
+{"tag": "risk_factors_partial_denial", "patient_text": "I'm diabetic but my blood pressure and cholesterol are both fine.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["diabetes"]}}
+{"tag": "history_bypass", "patient_text": "I had a triple bypass back in 2019.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
+{"tag": "history_nitro_implies", "patient_text": "I keep nitroglycerin spray for my heart.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": true}}
+{"tag": "history_negation_trap", "patient_text": "My father had a heart attack when he was 58, but I've never been diagnosed with anything myself.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false, "cardiac_risk_factors": ["strong_family_history"]}}
+{"tag": "history_risk_not_disease", "patient_text": "I've got high blood pressure but no actual heart condition.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false, "cardiac_risk_factors": ["hypertension"]}}
+{"tag": "severity_categorical_severe", "patient_text": "It's unbearable, I can't do anything at all, I'm just lying here.", "known_slots": {}, "gold_slots": {"severity_1_10": 9}}
+{"tag": "severity_categorical_severe", "patient_text": "Excruciating. I've never felt anything like it.", "known_slots": {}, "gold_slots": {"severity_1_10": 9}}
+{"tag": "severity_categorical_moderate", "patient_text": "It woke me up out of a dead sleep and I can't get comfortable.", "known_slots": {}, "gold_slots": {"severity_1_10": 6}}
+{"tag": "severity_boundary_7", "patient_text": "About a 7, maybe a 7 and a half.", "known_slots": {}, "gold_slots": {"severity_1_10": 7}}
+{"tag": "severity_boundary_8", "patient_text": "I'd say an 8 out of 10.", "known_slots": {}, "gold_slots": {"severity_1_10": 8}}
+{"tag": "other_symptoms_classic", "patient_text": "I've been really nauseous and I'm sweating through my shirt.", "known_slots": {}, "gold_slots": {"other_symptoms": ["nausea", "sweating"]}}
+{"tag": "other_symptoms_dizzy", "patient_text": "I keep feeling lightheaded, like I might go over.", "known_slots": {}, "gold_slots": {"other_symptoms": ["dizziness"]}}
+{"tag": "other_symptoms_cough", "patient_text": "I've had a cough for a few days and a bit of a fever.", "known_slots": {}, "gold_slots": {"other_symptoms": ["cough", "fever"]}}
+{"tag": "other_symptoms_negative_specific", "patient_text": "No sweating, no nausea, no trouble breathing. Just the pain.", "known_slots": {}, "gold_slots": {"other_symptoms": []}}
+{"tag": "duration_vs_onset_trap", "patient_text": "It's been happening on and off for three days, but each episode is only about two minutes.", "known_slots": {}, "gold_slots": {"duration": "under_5_min", "onset_hours_ago": 72, "pattern_comes_and_goes": true}}
+{"tag": "pain_quality_pressure", "patient_text": "Like a heavy weight sitting on me, real pressure.", "known_slots": {}, "gold_slots": {"pain_qualities": ["pressure", "heavy"]}}
+{"tag": "pain_quality_burning_trap", "patient_text": "It burns, kind of like indigestion, but I've never had indigestion before.", "known_slots": {}, "gold_slots": {"pain_qualities": ["burning"], "burning_in_chest": true, "heartburn_exact_match": false}}
+{"tag": "radiation_negative_explicit", "patient_text": "No, it doesn't go into my arms or my jaw or anywhere.", "known_slots": {}, "gold_slots": {"radiation_sites": []}}
+{"tag": "radiation_back", "patient_text": "It's tearing through to between my shoulder blades.", "known_slots": {}, "gold_slots": {"radiation_sites": ["back"], "pain_qualities": ["tearing"]}}
+{"tag": "onset_boundary_under_72", "patient_text": "Started day before yesterday, so about two days ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 48}}
+{"tag": "onset_boundary_over_72", "patient_text": "It's been going on since last Saturday, so five days or so.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 120}}
+{"tag": "correction_age", "patient_text": "Sorry, I said 52 before but I'm actually 62, I misspoke.", "known_slots": {"age": 52}, "gold_slots": {"age": 62}}
+{"tag": "correction_negation_flip", "patient_text": "Wait, I do have heart problems actually, I forgot about the stent.", "known_slots": {"history_of_heart_disease": false}, "gold_slots": {"history_of_heart_disease": true}}
+{"tag": "multi_fact_hedged_gerd_trap", "patient_text": "idk maybe 10 min? kinda crushing, goes into my arm i think \u2014 honestly probably just my heartburn again", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "pain_qualities": ["crushing"], "radiation_sites": ["arm"], "suspected_cause": "heartburn"}}
+{"tag": "multi_fact_dense_negatives", "patient_text": "I'm 68, had the pain about 40 minutes, no sweating or nausea, and it doesn't spread anywhere.", "known_slots": {}, "gold_slots": {"age": 68, "duration": "over_5_min", "onset_hours_ago": 0.67, "other_symptoms": [], "radiation_sites": []}}

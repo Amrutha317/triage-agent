@@ -1,0 +1,25 @@
+{"tag": "duration_under_5", "patient_text": "It lasts maybe 3 or 4 minutes each time.", "known_slots": {}, "gold_slots": {"duration": "under_5_min"}}
+{"tag": "duration_under_5", "patient_text": "Less than five minutes, usually.", "known_slots": {}, "gold_slots": {"duration": "under_5_min"}}
+{"tag": "radiation", "patient_text": "It shoots up into my jaw when it happens.", "known_slots": {}, "gold_slots": {"radiation_sites": ["jaw"]}}
+{"tag": "radiation", "patient_text": "Kind of moves down my left arm.", "known_slots": {}, "gold_slots": {"radiation_sites": ["arm"]}}
+{"tag": "radiation", "patient_text": "Radiates straight through to my back.", "known_slots": {}, "gold_slots": {"radiation_sites": ["back"]}}
+{"tag": "onset_minutes", "patient_text": "This started about 20 minutes ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 0.33}}
+{"tag": "onset_minutes", "patient_text": "Just started, maybe 5 minutes ago.", "known_slots": {}, "gold_slots": {"onset_hours_ago": 0.083}}
+{"tag": "gerd_trap", "patient_text": "It's probably just my heartburn, I get this all the time.", "known_slots": {}, "gold_slots": {"suspected_cause": "heartburn"}}
+{"tag": "multi_fact_dense", "patient_text": "It's a crushing pain right in the middle of my chest, been going on for about 15 minutes, radiates into my left arm and jaw, and I feel really sweaty and nauseous.", "known_slots": {}, "gold_slots": {"duration": "over_5_min", "pain_qualities": ["crushing"], "radiation_sites": ["arm", "jaw"], "other_symptoms": ["sweating", "nausea"]}}
+{"tag": "multi_fact_dense", "patient_text": "I'm 58, it started 20 minutes ago, hurts about a 7 out of 10, and I have diabetes and high blood pressure.", "known_slots": {}, "gold_slots": {"age": 58, "onset_hours_ago": 0.33, "severity_1_10": 7, "cardiac_risk_factors": ["diabetes", "hypertension"]}}
+{"tag": "nitro_resolved", "patient_text": "Took my nitro pill about ten minutes ago and the pain's completely gone now.", "known_slots": {}, "gold_slots": {"nitroglycerin_status": "taken_resolved"}}
+{"tag": "injury_redirect", "patient_text": "This started right after I got hit in the chest playing football.", "known_slots": {}, "gold_slots": {"followed_chest_injury": true}}
+{"tag": "rash", "patient_text": "There's a rash right where it hurts, looks like little blisters.", "known_slots": {}, "gold_slots": {"rash_at_pain_site": true}}
+{"tag": "passed_out", "patient_text": "I fainted for a few seconds earlier.", "known_slots": {}, "gold_slots": {"passed_out": true}}
+{"tag": "age_plain", "patient_text": "I'm 47.", "known_slots": {}, "gold_slots": {"age": 47}}
+{"tag": "age_boundary_44", "patient_text": "I just turned 44 last month.", "known_slots": {}, "gold_slots": {"age": 44}}
+{"tag": "present_now_easing", "patient_text": "It's easing off but still there a bit.", "known_slots": {}, "gold_slots": {"chest_pain_present_now": true}}
+{"tag": "history_negative_emphatic", "patient_text": "No, never had any heart trouble in my life.", "known_slots": {}, "gold_slots": {"history_of_heart_disease": false}}
+{"tag": "severity_categorical_mild", "patient_text": "It's there but I've been getting on with my day fine.", "known_slots": {}, "gold_slots": {"severity_1_10": 2}}
+{"tag": "severity_range", "patient_text": "Somewhere between a 4 and a 6 depending on the moment.", "known_slots": {}, "gold_slots": {"severity_1_10": 5}}
+{"tag": "other_symptoms_vomiting", "patient_text": "I threw up twice this morning and I still feel sick.", "known_slots": {}, "gold_slots": {"other_symptoms": ["vomiting", "nausea"]}}
+{"tag": "duration_boundary_5", "patient_text": "About five minutes, roughly.", "known_slots": {}, "gold_slots": {}}
+{"tag": "context_no_restate_age", "patient_text": "The pain is about a 6 right now.", "known_slots": {"age": 55, "duration": "over_5_min"}, "gold_slots": {"severity_1_10": 6}}
+{"tag": "hedged_no_guess_severity", "patient_text": "I really couldn't put a number on it, sorry.", "known_slots": {}, "gold_slots": {}}
+{"tag": "risk_factors_pvd", "patient_text": "I have poor circulation in my legs, peripheral vascular disease they call it.", "known_slots": {}, "gold_slots": {"cardiac_risk_factors": ["pvd"]}}

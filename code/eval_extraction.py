@@ -87,11 +87,12 @@ def score_row(gold: dict, pred: dict) -> dict:
     }
 
 
-def run(model: str, hint_asked: bool, concurrency: int) -> dict:
+def run(model: str, hint_asked: bool, concurrency: int,
+        rows_path: str = _GOLDEN) -> dict:
     from llm_client import LLMClient
 
     client = LLMClient(model=model, llm_questions=False, llm_final=False)
-    rows = load_golden(_GOLDEN)
+    rows = load_golden(rows_path)
 
     def one(r: dict) -> dict:
         asked = list(r["gold_slots"]) if hint_asked else None
@@ -208,6 +209,11 @@ def main() -> None:
                                                       "meta-llama/Llama-3.1-8B-Instruct"))
     ap.add_argument("--out", default=None)
     ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--rows", default=_GOLDEN,
+                    help="jsonl to evaluate against (default: the full 112-row "
+                         "golden set). Use data/eval/extraction_test.jsonl for "
+                         "the reported number and extraction_val.jsonl for "
+                         "adapter selection -- see code/split_val.py.")
     ap.add_argument("--hint-asked", action="store_true",
                     help="tell the extractor which slots were 'asked' (= the gold "
                          "keys). Off by default -- pure extraction from text.")
@@ -218,8 +224,9 @@ def main() -> None:
         compare(*args.compare)
         return
 
-    print(f"extraction eval: {args.model} (hint_asked={args.hint_asked})")
-    agg = run(args.model, args.hint_asked, args.concurrency)
+    print(f"extraction eval: {args.model} (rows={os.path.basename(args.rows)}, "
+          f"hint_asked={args.hint_asked})")
+    agg = run(args.model, args.hint_asked, args.concurrency, args.rows)
     report(agg)
     if args.out:
         os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
