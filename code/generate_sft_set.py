@@ -39,14 +39,17 @@ correct on all 5 offline):
      other_symptoms=[difficulty_breathing] from a vague "some of those"
                                             -> extract ANTI-HALLUCINATION below.
 
-v2 CHANGES (after measuring v1 with eval_extraction.py / eval_distress.py)
-  * distress rows emit the four OPTIONAL flags only when TRUE (was: all six
-    booleans every row -- that taught the adapter to assert
-    visible_facial_diaphoresis=false on bland turns, which the base model
-    omits). life_threatening / very_sick_or_weak / rationale still always present.
-  * new extraction rows for the value-accuracy misses v1 showed:
+v2 (measured, then rolled back): tried distress rows emitting only the true
+  optional flags + 5 training epochs. Both over-corrected -- the classifier
+  collapsed (micro-F1 0.74 -> 0.29, optional-flag recall -> 0) and the extractor
+  over-fit (guard-slot key-F1 1.0 -> 0.67). Do NOT re-introduce either.
+
+v3 CHANGES (current)
+  * distress rows: reverted to all-six-flags-every-row (v1 behaviour).
+  * KEPT the v2 extraction rows for value-accuracy misses:
     bystander_not_patient ("my dad had a heart attack at 50" != age 50),
     stent_not_angina, central_location_not_extracted, onset_precision.
+  * train with --epochs 3 (not 5).
 
 Run:
     python code/generate_sft_set.py
@@ -114,23 +117,21 @@ def ex_row(text: str, gold: dict, category: str,
 def di_row(text: str, category: str, *, rationale: str, history: str = "",
            sdb=False, conf=False, shock=False, diap=False,
            lt=False, vsw=False) -> dict:
-    # v2: emit the four OPTIONAL flags only when true (matches how the base
-    # model behaves on calm turns, per probe_distress.py -- v1 emitted all six
-    # explicit booleans every row, which taught the adapter to assert
-    # `visible_facial_diaphoresis: false` etc. on bland follow-up turns). The
-    # two schema-required keys + rationale are always present.
-    obj: dict = {}
-    if sdb:
-        obj["severe_difficulty_breathing"] = True
-    if conf:
-        obj["confused_or_hard_to_awaken"] = True
-    if shock:
-        obj["shock_signs"] = True
-    if diap:
-        obj["visible_facial_diaphoresis"] = True
-    obj["life_threatening"] = lt
-    obj["very_sick_or_weak"] = vsw
-    obj["rationale"] = rationale
+    # v3: back to emitting all six flags explicitly every row (v1 behaviour).
+    # v2's "true-only" format collapsed the classifier at 5 epochs -- the model
+    # learned that the four optional flags "don't appear" and stopped emitting
+    # them at all (severe_difficulty_breathing / confused recall 1.0 -> 0.0,
+    # micro-F1 0.74 -> 0.29). Emitting every key every row is clumsy but keeps
+    # each flag in the output vocabulary and learnable.
+    obj = {
+        "severe_difficulty_breathing": sdb,
+        "confused_or_hard_to_awaken": conf,
+        "shock_signs": shock,
+        "visible_facial_diaphoresis": diap,
+        "life_threatening": lt,
+        "very_sick_or_weak": vsw,
+        "rationale": rationale,
+    }
     return {
         "messages": [
             {"role": "system", "content": DISTRESS_SYS},
