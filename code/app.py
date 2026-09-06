@@ -153,7 +153,12 @@ def main() -> None:
 
     demo = build()
     demo.queue()
-    demo.launch(share=args.share, server_name="0.0.0.0", server_port=args.port)
+    # show_api=False skips the auto-generated API-schema page. That path
+    # (gradio_client._json_schema_to_python_type) crashes on this gradio 4.44.1
+    # / gradio_client pairing with "argument of type 'bool' is not iterable",
+    # which 500s the whole app. We don't expose a programmatic API anyway.
+    demo.launch(share=args.share, server_name="0.0.0.0", server_port=args.port,
+                show_api=False)
 
 
 if __name__ == "__main__":
