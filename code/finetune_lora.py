@@ -86,11 +86,18 @@ def main() -> None:
             bnb_4bit_compute_dtype=compute_dtype,
         )
 
+    # Pin the whole model to one GPU. device_map="auto" will silently spill
+    # layers to CPU/disk when VRAM is tight (e.g. a vLLM server still holding
+    # the card) -- and bitsandbytes 4-bit then aborts with an opaque
+    # "Some modules are dispatched on the CPU or the disk" error. {"": 0} makes
+    # it either fit or raise a clear CUDA OOM. Stop any `vllm serve` before
+    # training: serving and training can't share the GPU here.
+    device_map = {"": 0} if torch.cuda.is_available() else None
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
         quantization_config=quant_cfg,
         torch_dtype=compute_dtype,
-        device_map="auto",
+        device_map=device_map,
     )
     model.config.use_cache = False
     if not args.no_4bit:
