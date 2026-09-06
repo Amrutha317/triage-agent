@@ -2,8 +2,8 @@
 generate_scenarios.py -- build data/eval/scenarios.jsonl from cases that
 already exist and are already trusted: the 55 cases in
 tests/test_decision_engine.py (which pin rules.yaml to the protocol) plus the
-11 cases in tests/audit/golden_cases.yaml (an independent adversarial pass
-over rules.yaml, built after the deterministic core -- see tests/audit/).
+11 cases in tests/golden_cases.yaml (an independent adversarial pass over
+rules.yaml).
 
 No new authoring. gold_disposition/gold_rule_id are RECOMPUTED here from the
 live engine (not copied from the test files) so this script also acts as a
@@ -57,7 +57,7 @@ def from_test_decision_engine() -> list[dict]:
 def from_golden_cases() -> list[dict]:
     import yaml
 
-    path = os.path.join(os.path.dirname(__file__), "..", "tests", "audit", "golden_cases.yaml")
+    path = os.path.join(os.path.dirname(__file__), "..", "tests", "golden_cases.yaml")
     cases = yaml.safe_load(open(path, encoding="utf-8"))["cases"]
     out = []
     for c in cases:

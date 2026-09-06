@@ -44,6 +44,6 @@ python code/app.py           # Gradio chat UI   (headless alternative: python co
 | `data/train/` | 290-row synthetic SFT set + generation notes |
 | `outputs/` | `accuracy_report.md` + baseline & LoRA eval JSONs (`iterations/` = rolled-back attempts) |
 | `docs/` | the report PDF (+ longer-form markdown backing it) |
-| `tests/` | `pytest -q` → 205 passing; `tests/audit/` = protocol-vs-PDF conformance checks |
+| `tests/` | `pytest -q` → 205 passing (one case per rule, dialogue control, reachability, guardrails, data-file well-formedness) |
 
 Evaluation and fine-tune commands are in the report PDF §5–§6.

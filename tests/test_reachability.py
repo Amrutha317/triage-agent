@@ -8,9 +8,8 @@ test_reachability.py -- two properties worth proving, not just asserting:
      it can't tell the two apart from a slot dict alone). The fallback for the
      second case lives one layer up, in state_machine.py, which DOES know
      whether anything is still askable. This test proves that layer actually
-     catches every such state, using the same brute-force probe space the
-     conformance checker (tests/audit/check_rules.py, check C7) used to find
-     2,160 of 31,104 raw-engine holes.
+     catches every such state, brute-forcing a probe space that finds 2,160 of
+     31,104 raw-engine holes.
 
   2. No rule with a protocol "Exception:" clause can lock in its disposition
      without the FSM ever asking about the exception -- i.e. the exception
@@ -31,8 +30,7 @@ from state_machine import FALLBACK_DISPOSITION, TriageStateMachine  # noqa: E402
 
 ENGINE = RulesEngine()
 
-# Same probe space as tests/audit/check_rules.py's C7 check, kept in sync
-# deliberately -- if that script's space changes, update this one too.
+# Brute-force probe space over the decision-relevant slots.
 _SPACE = {
     "chest_pain_present_now": [True, False],
     "duration": ["few_seconds", "under_5_min", "over_5_min"],
@@ -80,7 +78,7 @@ def test_raw_engine_has_the_known_reachability_holes():
     holes = _raw_engine_holes()
     assert len(holes) == 2160, (
         f"hole count changed to {len(holes)} -- rules.yaml was edited; "
-        f"re-run tests/audit/check_rules.py's C7 check and update this number"
+        f"update this number if the change is intentional"
     )
 
 
