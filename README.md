@@ -6,9 +6,10 @@ Guidelines | Adult | 2026"* protocol.
 
 Hybrid design: a **deterministic rules engine + state machine own every
 triage decision**; a local open-source LLM (≤ 20B) only (a) extracts
-structured slots from free-text patient replies and (b) phrases the agent's
-questions and final instructions. **The LLM never chooses a disposition and
-never diagnoses.**
+structured slots from free-text patient replies, (b) classifies how distressed
+the patient sounds, and (c) phrases the agent's questions. **The LLM never
+chooses a disposition and never diagnoses** (the final instruction is
+templated protocol text).
 
 ## Status
 
@@ -18,22 +19,25 @@ never diagnoses.**
 | `code/state_machine.py` — next-question selection, red-flag short-circuit, fallback | ✅ |
 | `code/llm_client.py` — slot extractor + distress classifier + question NLG | ✅ |
 | `code/guardrails.py` — output post-filter (no diagnosis, no unbacked reassurance) | ✅ |
-| `code/agent.py` + `code/app.py` — conversation wiring + Gradio chat UI | ✅ |
+| `code/agent.py` + `code/app.py` + `code/chat_cli.py` — conversation wiring + Gradio UI + terminal client | ✅ |
 | `code/eval_harness.py` + `data/eval/` — triage/workflow accuracy, TTFT, latency | ✅ |
 | `data/train/` + `code/generate_sft_set.py` + `code/finetune_lora.py` — SFT set + QLoRA | ✅ |
 | baseline-vs-LoRA report + CIs (`code/eval_extraction.py`, `eval_distress.py`, `eval_ci.py`) | ✅ |
 | `tests/` — `pytest -q` → **205 passing** | ✅ |
-| CPU-latency row · demo video | ⏳ |
+| GPU latency | ✅ · CPU latency not benchmarked (GPU used) · demo video ⏳ |
 
 ## Quick start
 
 ```
-pip install -r requirements.txt      # deterministic core + eval client + UI
-pytest -q                            # 205 tests, no GPU / network needed
+pip install -r requirements.txt && pytest -q       # 205 tests, no GPU / network needed
 ```
 
-Everything above the LLM runs offline. To exercise the full LLM pipeline you need a
-vLLM server (a GPU pod — see below).
+`requirements.txt` covers the deterministic core, the tests, the eval client, and the
+UI — everything that runs without a GPU. **Fine-tuning is not covered by it**
+(`torch`, `transformers`, `peft`, `trl`, `bitsandbytes`, …): those come from
+`bootstrap.sh` on a CUDA box, or `pip install -r requirements.lock`.
+
+To exercise the full LLM pipeline you need a vLLM server (a GPU pod — see below).
 
 ## Running the full pipeline (GPU pod)
 
@@ -55,9 +59,9 @@ python code/eval_ci.py outputs/extract_base.json outputs/extract_lora.json
 ```
 
 The trained adapter is **not committed** (large binary; and the eval found no
-measurable benefit — `docs/finetuning-report.md`). To regenerate the exact reported
-v1 adapter: `git checkout d2aa28d -- code/generate_sft_set.py` then the two commands
-above.
+measurable benefit — `docs/finetuning-report.md`). `data/train/sft_v1.jsonl` and
+`code/generate_sft_set.py` regenerate it; the reported v1 adapter used an earlier
+268-row version of that set (see `docs/report.md` §6.1).
 
 ## Model selection
 
